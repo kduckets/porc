@@ -18,6 +18,7 @@ interface DrawingEntry {
   type: 'poop' | 'cloud'
   title: string
   artist: string
+  comments: Record<string, string>
 }
 
 export default function Home() {
@@ -28,7 +29,7 @@ export default function Home() {
   const [drawing, setDrawing] = useState<string | null>(null)
   const [drawingType, setDrawingType] = useState<'poop' | 'cloud' | null>(null)
   const [drawingTitle, setDrawingTitle] = useState<string | null>(null)
-  const [votes, setVotes] = useState<Record<string, 'poop' | 'cloud'>>({})
+  const [votes, setVotes] = useState<Record<string, { vote: 'poop' | 'cloud', comment: string }>>({})
   const [scores, setScores] = useState<Record<string, number>>({})
   const [gallery, setGallery] = useState<DrawingEntry[]>([])
 
@@ -150,15 +151,10 @@ export default function Home() {
     await set(ref(database, 'gameState'), 'voting')
   }
 
-  const handleVote = async (player: string, vote: 'poop' | 'cloud') => {
+  const handleVote = async (player: string, vote: 'poop' | 'cloud', comment: string) => {
     if (!players.includes(player)) return // Ensure only joined players can vote
 
-    await set(ref(database, `votes/${player}`), vote)
-    const votesSnapshot = await get(ref(database, 'votes'))
-    const votesData = votesSnapshot.val() || {}
-    if (Object.keys(votesData).length === players.length - 1) {
-      updateScores()
-    }
+    await set(ref(database, `votes/${player}`), { vote, comment })
   }
 
   const updateScores = async () => {
@@ -166,7 +162,7 @@ export default function Home() {
     let correctVotes = 0
     const totalVotes = Object.keys(votes).length
 
-    Object.entries(votes).forEach(([player, vote]) => {
+    Object.entries(votes).forEach(([player, { vote }]) => {
       if (vote === drawingType) {
         correctVotes++
         newScores[player] = (newScores[player] || 0) + 1
@@ -184,14 +180,17 @@ export default function Home() {
   const handleNextRound = async (nextArtist: string) => {
     await updateScores()
 
-    // Save the current drawing to the gallery
+    // Save the drawing to the art gallery with comments
     if (drawing && drawingType && drawingTitle && currentArtist) {
       const galleryRef = ref(database, 'gallery')
       await push(galleryRef, {
         drawing,
         type: drawingType,
         title: drawingTitle,
-        artist: currentArtist
+        artist: currentArtist,
+        comments: Object.fromEntries(
+          Object.entries(votes).map(([player, { comment }]) => [player, comment])
+        )
       })
     }
 
@@ -216,8 +215,15 @@ export default function Home() {
     localStorage.removeItem('playerName')
   }
 
+  const handleAddComment = async (drawingId: string, comment: string) => {
+    if (!currentPlayer) return
+
+    const drawingRef = ref(database, `gallery/${drawingId}/comments/${currentPlayer}`)
+    await set(drawingRef, comment)
+  }
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-4 sm:p-8 md:p-24">
+    <main className="flex min-h-screen flex-col items-center justify-center p-24">
       <h1 className="text-4xl font-bold mb-8">Poop or Cloud?</h1>
       {gameState === 'lobby' && (
         <LobbyComponent
@@ -248,7 +254,11 @@ export default function Home() {
           onNextRound={handleNextRound}
         />
       )}
-      <GalleryComponent gallery={gallery} />
+      <GalleryComponent 
+        gallery={gallery} 
+        currentPlayer={currentPlayer}
+        onAddComment={handleAddComment}
+      />
       <ScoreboardComponent scores={scores} />
       <ResetGameComponent onReset={handleResetGame} />
     </main>

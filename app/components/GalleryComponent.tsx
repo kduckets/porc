@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog"
 import { ScrollArea } from "./ui/scroll-area"
+import { Button } from "./ui/button"
+import { Input } from "./ui/input"
 
 interface DrawingEntry {
   id: string
@@ -9,14 +11,25 @@ interface DrawingEntry {
   type: 'poop' | 'cloud'
   title: string
   artist: string
+  comments: Record<string, string>
 }
 
 interface GalleryComponentProps {
   gallery: DrawingEntry[]
+  currentPlayer: string | null
+  onAddComment: (drawingId: string, comment: string) => void
 }
 
-export default function GalleryComponent({ gallery }: GalleryComponentProps) {
+export default function GalleryComponent({ gallery, currentPlayer, onAddComment }: GalleryComponentProps) {
   const [selectedDrawing, setSelectedDrawing] = useState<DrawingEntry | null>(null)
+  const [newComment, setNewComment] = useState('')
+
+  const handleAddComment = () => {
+    if (selectedDrawing && currentPlayer && newComment.trim()) {
+      onAddComment(selectedDrawing.id, newComment.trim())
+      setNewComment('')
+    }
+  }
 
   return (
     <Card className="w-full max-w-4xl mx-auto mt-8">
@@ -57,6 +70,35 @@ export default function GalleryComponent({ gallery }: GalleryComponentProps) {
                       className="w-full h-auto max-h-[70vh] object-contain"
                     />
                     <p className="mt-2 text-sm text-gray-500">Type: {entry.type}</p>
+                    <div className="mt-4">
+                      <h4 className="font-semibold mb-2">Comments:</h4>
+                      <ScrollArea className="h-40 w-full border rounded-md p-2">
+                        {entry.comments && Object.entries(entry.comments).length > 0 ? (
+                          Object.entries(entry.comments).map(([player, comment]) => (
+                            <div key={player} className="mb-2">
+                              <p className="font-semibold">{player}:</p>
+                              <p className="text-sm text-gray-600">{comment}</p>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-sm text-gray-500">No comments for this drawing.</p>
+                        )}
+                      </ScrollArea>
+                    </div>
+                    {currentPlayer && (
+                      <div className="mt-4">
+                        <Input
+                          type="text"
+                          placeholder="Add a comment"
+                          value={newComment}
+                          onChange={(e) => setNewComment(e.target.value)}
+                          className="w-full mb-2"
+                        />
+                        <Button onClick={handleAddComment} disabled={!newComment.trim()}>
+                          Add Comment
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </DialogContent>
               </Dialog>
