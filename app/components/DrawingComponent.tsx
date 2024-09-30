@@ -2,12 +2,13 @@ import { useState, useRef, useEffect } from 'react'
 import { Button } from "./ui/button"
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group"
 import { Label } from "./ui/label"
+import { Input } from "./ui/input"
 import { Slider } from "./ui/slider"
 import { Paintbrush, Eraser, Square, Circle, Droplet, Pipette, Undo2, Redo2 } from 'lucide-react'
 
 interface DrawingComponentProps {
   artist: string
-  onSubmit: (drawingData: string, drawingType: 'poop' | 'cloud') => void
+  onSubmit: (drawingData: string, drawingType: 'poop' | 'cloud', title: string) => void
   isCurrentPlayer: boolean
 }
 
@@ -22,6 +23,7 @@ export default function DrawingComponent({ artist, onSubmit, isCurrentPlayer }: 
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [isDrawing, setIsDrawing] = useState(false)
   const [drawingType, setDrawingType] = useState<'poop' | 'cloud'>('poop')
+  const [title, setTitle] = useState('')
   const [color, setColor] = useState('#000000')
   const [brushSize, setBrushSize] = useState(2)
   const [tool, setTool] = useState<Tool>('brush')
@@ -203,7 +205,7 @@ export default function DrawingComponent({ artist, onSubmit, isCurrentPlayer }: 
     const canvas = canvasRef.current
     if (canvas) {
       const drawingData = canvas.toDataURL()
-      onSubmit(drawingData, drawingType)
+      onSubmit(drawingData, drawingType, title)
     }
   }
 
@@ -273,6 +275,13 @@ export default function DrawingComponent({ artist, onSubmit, isCurrentPlayer }: 
               <Label htmlFor="cloud">Cloud</Label>
             </div>
           </RadioGroup>
+          <Input
+            type="text"
+            placeholder="Enter a title for your drawing"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="max-w-md"
+          />
           <div className="flex flex-wrap gap-2 items-center">
             {colors.map((c) => (
               <button
@@ -371,7 +380,7 @@ export default function DrawingComponent({ artist, onSubmit, isCurrentPlayer }: 
           />
           <div className="flex space-x-4">
             <Button onClick={clearCanvas}>Clear Canvas</Button>
-            <Button onClick={handleSubmit}>Submit Drawing</Button>
+            <Button onClick={handleSubmit} disabled={!title.trim()}>Submit Drawing</Button>
           </div>
         </>
       ) : (

@@ -1,40 +1,29 @@
 import { Button } from "./ui/button"
 
 interface VotingComponentProps {
-  drawing: string | null
+  drawing: string
   players: string[]
-  currentArtist: string | null
+  currentArtist: string
   onVote: (player: string, vote: 'poop' | 'cloud') => void
-  currentPlayer: string | null
+  currentPlayer: string
 }
 
 export default function VotingComponent({ drawing, players, currentArtist, onVote, currentPlayer }: VotingComponentProps) {
-  const votingPlayers = players.filter(player => player !== currentArtist)
+  const canVote = currentPlayer !== currentArtist && !players.includes(currentPlayer)
 
   return (
     <div className="space-y-4">
       <h2 className="text-2xl font-semibold">Voting Phase</h2>
       <p>Artist: {currentArtist}</p>
-      {drawing && <img src={drawing} alt="Drawing" className="border border-gray-300 max-w-md mx-auto" />}
-      {currentPlayer && currentPlayer !== currentArtist ? (
-        <div className="space-y-2">
-          <p>Cast your vote:</p>
-          <div className="flex justify-center space-x-4">
-            <Button onClick={() => onVote(currentPlayer, 'poop')}>Poop</Button>
-            <Button onClick={() => onVote(currentPlayer, 'cloud')}>Cloud</Button>
-          </div>
+      <img src={drawing} alt="Drawing to vote on" className="max-w-md mx-auto" />
+      {canVote ? (
+        <div className="flex justify-center space-x-4">
+          <Button onClick={() => onVote(currentPlayer, 'poop')}>Vote Poop</Button>
+          <Button onClick={() => onVote(currentPlayer, 'cloud')}>Vote Cloud</Button>
         </div>
       ) : (
-        <p>{currentPlayer === currentArtist ? "Waiting for others to vote..." : "Please join the game to vote."}</p>
+        <p>{currentPlayer === currentArtist ? "You're the artist! Wait for others to vote." : "Waiting for other players to vote..."}</p>
       )}
-      <div className="mt-4">
-        <h3 className="text-lg font-semibold">Players voting:</h3>
-        <ul className="list-disc list-inside">
-          {votingPlayers.map((player, index) => (
-            <li key={index}>{player}</li>
-          ))}
-        </ul>
-      </div>
     </div>
   )
 }

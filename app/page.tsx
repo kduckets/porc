@@ -19,6 +19,7 @@ export default function Home() {
   const [currentArtist, setCurrentArtist] = useState<string | null>(null)
   const [drawing, setDrawing] = useState<string | null>(null)
   const [drawingType, setDrawingType] = useState<'poop' | 'cloud' | null>(null)
+  const [drawingTitle, setDrawingTitle] = useState<string | null>(null)
   const [votes, setVotes] = useState<Record<string, 'poop' | 'cloud'>>({})
   const [scores, setScores] = useState<Record<string, number>>({})
 
@@ -28,6 +29,7 @@ export default function Home() {
     const currentArtistRef = ref(database, 'currentArtist')
     const drawingRef = ref(database, 'drawing')
     const drawingTypeRef = ref(database, 'drawingType')
+    const drawingTitleRef = ref(database, 'drawingTitle')
     const votesRef = ref(database, 'votes')
     const scoresRef = ref(database, 'scores')
 
@@ -56,6 +58,10 @@ export default function Home() {
       setDrawingType(snapshot.val())
     })
 
+    const unsubscribeDrawingTitle = onValue(drawingTitleRef, (snapshot) => {
+      setDrawingTitle(snapshot.val())
+    })
+
     const unsubscribeVotes = onValue(votesRef, (snapshot) => {
       setVotes(snapshot.val() || {})
     })
@@ -77,6 +83,7 @@ export default function Home() {
       unsubscribeCurrentArtist()
       unsubscribeDrawing()
       unsubscribeDrawingType()
+      unsubscribeDrawingTitle()
       unsubscribeVotes()
       unsubscribeScores()
     }
@@ -110,11 +117,13 @@ export default function Home() {
     set(ref(database, 'votes'), {})
     set(ref(database, 'drawing'), null)
     set(ref(database, 'drawingType'), null)
+    set(ref(database, 'drawingTitle'), null)
   }
 
-  const handleSubmitDrawing = (drawingData: string, type: 'poop' | 'cloud') => {
+  const handleSubmitDrawing = (drawingData: string, type: 'poop' | 'cloud', title: string) => {
     set(ref(database, 'drawing'), drawingData)
     set(ref(database, 'drawingType'), type)
+    set(ref(database, 'drawingTitle'), title)
     set(ref(database, 'gameState'), 'voting')
   }
 
@@ -149,6 +158,7 @@ export default function Home() {
     set(ref(database, 'votes'), {})
     set(ref(database, 'drawing'), null)
     set(ref(database, 'drawingType'), null)
+    set(ref(database, 'drawingTitle'), null)
   }
 
   const handleResetGame = () => {
@@ -157,6 +167,7 @@ export default function Home() {
     set(ref(database, 'currentArtist'), null)
     set(ref(database, 'drawing'), null)
     set(ref(database, 'drawingType'), null)
+    set(ref(database, 'drawingTitle'), null)
     set(ref(database, 'votes'), null)
     set(ref(database, 'scores'), null)
     setCurrentPlayer(null)
@@ -194,6 +205,7 @@ export default function Home() {
         <ResultsComponent
           drawing={drawing!}
           drawingType={drawingType!}
+          drawingTitle={drawingTitle!}
           votes={votes}
           onNextRound={handleNextRound}
         />
