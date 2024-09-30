@@ -261,7 +261,7 @@ export default function Home() {
           onAddComment={handleAddComment}
         />
         <ScoreboardComponent scores={scores} />
-        <ResetGameComponent onReset={handleResetGame} />
+        {/* <ResetGameComponent onReset={handleResetGame} /> */}
       </div>
     </main>
   )
