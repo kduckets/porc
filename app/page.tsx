@@ -127,14 +127,12 @@ export default function Home() {
   }
 
   const handleVote = async (player: string, vote: 'poop' | 'cloud') => {
+    if (!players.includes(player)) return // Ensure only joined players can vote
+
     await set(ref(database, `votes/${player}`), vote)
     const votesSnapshot = await get(ref(database, 'votes'))
     const votesData = votesSnapshot.val() || {}
-    const playersSnapshot = await get(ref(database, 'players'))
-    const playersData = playersSnapshot.val() || {}
-    const playerCount = Object.keys(playersData).length
-
-    if (Object.keys(votesData).length === playerCount - 1) {
+    if (Object.keys(votesData).length === players.length - 1) {
       await set(ref(database, 'gameState'), 'results')
       updateScores()
     }
@@ -190,23 +188,13 @@ export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-24">
       <h1 className="text-4xl font-bold mb-8">Poop or Cloud?</h1>
-      {!currentPlayer && (
+      {gameState === 'lobby' && (
         <LobbyComponent
           players={players}
           onJoin={handleJoin}
           onStart={handleStartGame}
           currentPlayer={currentPlayer}
         />
-      )}
-      {currentPlayer && gameState === 'lobby' && (
-        <div>
-          <p>Waiting for the game to start...</p>
-          {players.length >= 2 && (
-            <button onClick={handleStartGame} className="mt-4 px-4 py-2 bg-blue-500 text-white rounded">
-              Start Game
-            </button>
-          )}
-        </div>
       )}
       {gameState === 'drawing' && (
         <DrawingComponent
@@ -221,7 +209,7 @@ export default function Home() {
           players={players}
           currentArtist={currentArtist!}
           onVote={handleVote}
-          currentPlayer={currentPlayer!}
+          currentPlayer={currentPlayer}
           votes={votes}
         />
       )}

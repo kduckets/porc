@@ -5,7 +5,7 @@ interface VotingComponentProps {
   players: string[]
   currentArtist: string
   onVote: (player: string, vote: 'poop' | 'cloud') => void
-  currentPlayer: string
+  currentPlayer: string | null
   votes: Record<string, 'poop' | 'cloud'>
 }
 
@@ -17,7 +17,7 @@ export default function VotingComponent({
   currentPlayer,
   votes
 }: VotingComponentProps) {
-  const canVote = currentPlayer !== currentArtist && !votes[currentPlayer]
+  const canVote = currentPlayer && players.includes(currentPlayer) && currentPlayer !== currentArtist && !votes[currentPlayer]
 
   return (
     <div className="space-y-4">
@@ -31,11 +31,11 @@ export default function VotingComponent({
         </div>
       ) : (
         <p>
-          {currentPlayer === currentArtist 
-            ? "You're the artist! Wait for others to vote." 
-            : votes[currentPlayer] 
-              ? `You voted: ${votes[currentPlayer]}` 
-              : "Waiting for other players to vote..."}
+          {!currentPlayer ? "You need to join the game to vote." :
+           !players.includes(currentPlayer) ? "You're not part of this game. Please join to vote." :
+           currentPlayer === currentArtist ? "You're the artist! Wait for others to vote." : 
+           votes[currentPlayer] ? `You voted: ${votes[currentPlayer]}` : 
+           "Waiting for other players to vote..."}
         </p>
       )}
       <p>Votes cast: {Object.keys(votes).length} / {players.length - 1}</p>
