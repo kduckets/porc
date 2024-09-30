@@ -101,7 +101,7 @@ export default function VotingComponent({
             <Button onClick={handleNextRound} className="w-full">
               {currentPlayer === currentArtist 
                 ? "Start Next Round" 
-                : "Next Round (You'll be the artist)"}
+                : "Start Next Round (You'll be the artist)"}
             </Button>
           </div>
         )}
