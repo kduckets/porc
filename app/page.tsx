@@ -1,15 +1,24 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { onValue, ref, set, get } from 'firebase/database'
+import { onValue, ref, set, get, push } from 'firebase/database'
 import { database } from './firebase'
 import LobbyComponent from './components/LobbyComponent'
 import DrawingComponent from './components/DrawingComponent'
 import VotingComponent from './components/VotingComponent'
 import ResetGameComponent from './components/ResetGameComponent'
 import ScoreboardComponent from './components/ScoreboardComponent'
+import GalleryComponent from './components/GalleryComponent'
 
 type GameState = 'lobby' | 'drawing' | 'voting'
+
+interface DrawingEntry {
+  id: string
+  drawing: string
+  type: 'poop' | 'cloud'
+  title: string
+  artist: string
+}
 
 export default function Home() {
   const [gameState, setGameState] = useState<GameState>('lobby')
@@ -21,6 +30,7 @@ export default function Home() {
   const [drawingTitle, setDrawingTitle] = useState<string | null>(null)
   const [votes, setVotes] = useState<Record<string, 'poop' | 'cloud'>>({})
   const [scores, setScores] = useState<Record<string, number>>({})
+  const [gallery, setGallery] = useState<DrawingEntry[]>([])
 
   useEffect(() => {
     const gameStateRef = ref(database, 'gameState')
@@ -31,6 +41,7 @@ export default function Home() {
     const drawingTitleRef = ref(database, 'drawingTitle')
     const votesRef = ref(database, 'votes')
     const scoresRef = ref(database, 'scores')
+    const galleryRef = ref(database, 'gallery')
 
     const unsubscribeGameState = onValue(gameStateRef, (snapshot) => {
       setGameState(snapshot.val() || 'lobby')
@@ -65,6 +76,19 @@ export default function Home() {
       setScores(snapshot.val() || {})
     })
 
+    const unsubscribeGallery = onValue(galleryRef, (snapshot) => {
+      const galleryData = snapshot.val()
+      if (galleryData) {
+        const galleryArray = Object.entries(galleryData).map(([id, data]) => ({
+          id,
+          ...data as DrawingEntry
+        }))
+        setGallery(galleryArray)
+      } else {
+        setGallery([])
+      }
+    })
+
     // Load player name from local storage and join the game
     const storedPlayerName = localStorage.getItem('playerName')
     if (storedPlayerName) {
@@ -81,6 +105,7 @@ export default function Home() {
       unsubscribeDrawingTitle()
       unsubscribeVotes()
       unsubscribeScores()
+      unsubscribeGallery()
     }
   }, [])
 
@@ -123,6 +148,15 @@ export default function Home() {
     await set(ref(database, 'drawingType'), type)
     await set(ref(database, 'drawingTitle'), title)
     await set(ref(database, 'gameState'), 'voting')
+
+    // Save the drawing to the gallery
+    const galleryRef = ref(database, 'gallery')
+    await push(galleryRef, {
+      drawing: drawingData,
+      type,
+      title,
+      artist: currentArtist
+    })
   }
 
   const handleVote = async (player: string, vote: 'poop' | 'cloud') => {
@@ -212,6 +246,7 @@ export default function Home() {
       )}
       <ScoreboardComponent scores={scores} />
       <ResetGameComponent onReset={handleResetGame} />
+      <GalleryComponent gallery={gallery} />
     </main>
   )
 }
