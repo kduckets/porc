@@ -13,6 +13,8 @@ export default function DrawingComponent({ artist, onSubmit, isCurrentPlayer }: 
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [isDrawing, setIsDrawing] = useState(false)
   const [drawingType, setDrawingType] = useState<'poop' | 'cloud'>('poop')
+  const [lastX, setLastX] = useState(0)
+  const [lastY, setLastY] = useState(0)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -22,43 +24,61 @@ export default function DrawingComponent({ artist, onSubmit, isCurrentPlayer }: 
         context.strokeStyle = 'black'
         context.lineWidth = 2
         context.lineCap = 'round'
+        context.lineJoin = 'round'
       }
     }
   }, [])
 
-  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     if (!isCurrentPlayer) return
     setIsDrawing(true)
-    draw(e)
+    const { x, y } = getCoordinates(e)
+    setLastX(x)
+    setLastY(y)
   }
 
-  const stopDrawing = () => {
-    if (!isCurrentPlayer) return
-    setIsDrawing(false)
-    const canvas = canvasRef.current
-    if (canvas) {
-      const context = canvas.getContext('2d')
-      if (context) {
-        context.beginPath()
-      }
-    }
-  }
-
-  const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     if (!isDrawing || !isCurrentPlayer) return
     const canvas = canvasRef.current
     if (canvas) {
       const context = canvas.getContext('2d')
       if (context) {
-        const rect = canvas.getBoundingClientRect()
-        const x = e.clientX - rect.left
-        const y = e.clientY - rect.top
+        const { x, y } = getCoordinates(e)
+        context.beginPath()
+        context.moveTo(lastX, lastY)
         context.lineTo(x, y)
         context.stroke()
-        context.beginPath()
-        context.moveTo(x, y)
+        setLastX(x)
+        setLastY(y)
       }
     }
+  }
+
+  const stopDrawing = () => {
+    if (!isCurrentPlayer) return
+    setIsDrawing(false)
+  }
+
+  const getCoordinates = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current
+    if (canvas) {
+      const rect = canvas.getBoundingClientRect()
+      const scaleX = canvas.width / rect.width
+      const scaleY = canvas.height / rect.height
+
+      if ('touches' in e) {
+        return {
+          x: (e.touches[0].clientX - rect.left) * scaleX,
+          y: (e.touches[0].clientY - rect.top) * scaleY
+        }
+      } else {
+        return {
+          x: (e.clientX - rect.left) * scaleX,
+          y: (e.clientY - rect.top) * scaleY
+        }
+      }
+    }
+    return { x: 0, y: 0 }
   }
 
   const handleSubmit = () => {
@@ -105,11 +125,14 @@ export default function DrawingComponent({ artist, onSubmit, isCurrentPlayer }: 
             ref={canvasRef}
             width={400}
             height={400}
-            className="border border-gray-300 cursor-crosshair"
+            className="border border-gray-300 touch-none"
             onMouseDown={startDrawing}
+            onMouseMove={draw}
             onMouseUp={stopDrawing}
             onMouseOut={stopDrawing}
-            onMouseMove={draw}
+            onTouchStart={startDrawing}
+            onTouchMove={draw}
+            onTouchEnd={stopDrawing}
           />
           <div className="flex space-x-4">
             <Button onClick={clearCanvas}>Clear Canvas</Button>
