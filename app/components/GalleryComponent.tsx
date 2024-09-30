@@ -110,7 +110,7 @@ export default function GalleryComponent({ gallery, currentPlayer, onAddComment 
                           placeholder="Add a comment"
                           value={newComment}
                           onChange={(e) => setNewComment(e.target.value)}
-                          className="w-full mb-2"
+                          className="w-full mb-2 text-lg"
                         />
                         <Button onClick={handleAddComment} disabled={!newComment.trim()} className="w-full">
                           Add Comment
