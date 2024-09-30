@@ -13,7 +13,22 @@ interface DrawingComponentProps {
 
 type Tool = 'brush' | 'eraser'
 
-const colors = ['#000000', '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF']
+const colors = [
+  '#000000', // Black
+  '#FFFFFF', // White
+  '#FF0000', // Red
+  '#00FF00', // Green
+  '#0000FF', // Blue
+  '#FFFF00', // Yellow
+  '#FF00FF', // Magenta
+  '#00FFFF', // Cyan
+  '#8B4513', // Saddle Brown
+  '#A52A2A', // Brown
+  '#D2691E', // Chocolate
+  '#CD853F', // Peru
+  '#DEB887', // Burlywood
+  '#F4A460', // Sandy Brown
+]
 
 export default function DrawingComponent({ artist, onSubmit, isCurrentPlayer }: DrawingComponentProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -30,6 +45,8 @@ export default function DrawingComponent({ artist, onSubmit, isCurrentPlayer }: 
       if (context) {
         context.lineCap = 'round'
         context.lineJoin = 'round'
+        context.fillStyle = '#FFFFFF'
+        context.fillRect(0, 0, canvas.width, canvas.height)
       }
     }
   }, [])
@@ -106,34 +123,32 @@ export default function DrawingComponent({ artist, onSubmit, isCurrentPlayer }: 
               <Label htmlFor="cloud">Cloud</Label>
             </div>
           </RadioGroup>
-          <div className="flex space-x-4 items-center">
-            <div className="flex space-x-2">
-              {colors.map((c) => (
-                <button
-                  key={c}
-                  className={`w-8 h-8 rounded-full ${color === c ? 'ring-2 ring-offset-2 ring-gray-400' : ''}`}
-                  style={{ backgroundColor: c }}
-                  onClick={() => setColor(c)}
-                  aria-label={`Select color ${c}`}
-                />
-              ))}
-            </div>
-            <div className="flex items-center space-x-2">
-              <Button
-                variant={tool === 'brush' ? 'default' : 'outline'}
-                size="icon"
-                onClick={() => setTool('brush')}
-              >
-                <Paintbrush className="h-4 w-4" />
-              </Button>
-              <Button
-                variant={tool === 'eraser' ? 'default' : 'outline'}
-                size="icon"
-                onClick={() => setTool('eraser')}
-              >
-                <Eraser className="h-4 w-4" />
-              </Button>
-            </div>
+          <div className="flex flex-wrap gap-2 items-center">
+            {colors.map((c) => (
+              <button
+                key={c}
+                className={`w-8 h-8 rounded-full ${color === c ? 'ring-2 ring-offset-2 ring-gray-400' : ''}`}
+                style={{ backgroundColor: c }}
+                onClick={() => setColor(c)}
+                aria-label={`Select color ${c}`}
+              />
+            ))}
+          </div>
+          <div className="flex items-center space-x-2">
+            <Button
+              variant={tool === 'brush' ? 'default' : 'outline'}
+              size="icon"
+              onClick={() => setTool('brush')}
+            >
+              <Paintbrush className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={tool === 'eraser' ? 'default' : 'outline'}
+              size="icon"
+              onClick={() => setTool('eraser')}
+            >
+              <Eraser className="h-4 w-4" />
+            </Button>
           </div>
           <div className="flex items-center space-x-4">
             <Label htmlFor="brush-size">Brush Size:</Label>
