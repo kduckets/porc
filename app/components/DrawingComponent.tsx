@@ -6,7 +6,7 @@ import { RadioGroup, RadioGroupItem } from "./ui/radio-group"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./ui/card"
 import { Slider } from "./ui/slider"
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover"
-import { Droplet, UndoIcon, RedoIcon } from 'lucide-react'
+import { Droplet, Undo, Redo } from 'lucide-react'
 
 interface DrawingComponentProps {
   artist: string
@@ -15,6 +15,13 @@ interface DrawingComponentProps {
   onJoin: (name: string) => Promise<void>
   currentPlayer: string | null
 }
+
+const colors = [
+  '#000000', '#FFFFFF', '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#00FFFF', '#FF00FF',
+  '#C0C0C0', '#808080', '#800000', '#808000', '#008000', '#800080', '#008080', '#000080',
+  // Shades of brown
+  '#8B4513', '#A52A2A', '#D2691E', '#CD853F', '#DEB887', '#F4A460', '#D2B48C', '#FFDAB9'
+]
 
 export default function DrawingComponent({ artist, onSubmit, isCurrentPlayer, onJoin, currentPlayer }: DrawingComponentProps) {
   const [name, setName] = useState('')
@@ -80,7 +87,23 @@ export default function DrawingComponent({ artist, onSubmit, isCurrentPlayer, on
 
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     setIsDrawing(true)
-    draw(e)
+    const canvas = canvasRef.current
+    const ctx = canvas?.getContext('2d')
+    if (canvas && ctx) {
+      const rect = canvas.getBoundingClientRect()
+      const scaleX = canvas.width / rect.width
+      const scaleY = canvas.height / rect.height
+      let x, y
+      if ('touches' in e) {
+        x = (e.touches[0].clientX - rect.left) * scaleX
+        y = (e.touches[0].clientY - rect.top) * scaleY
+      } else {
+        x = (e.clientX - rect.left) * scaleX
+        y = (e.clientY - rect.top) * scaleY
+      }
+      ctx.beginPath()
+      ctx.moveTo(x, y)
+    }
   }
 
   const stopDrawing = () => {
@@ -174,8 +197,8 @@ export default function DrawingComponent({ artist, onSubmit, isCurrentPlayer, on
     ] : null
   }
 
-  const handleColorPick = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setColor(e.target.value)
+  const handleColorPick = (newColor: string) => {
+    setColor(newColor)
   }
 
   const handleEyeDropper = async () => {
@@ -241,27 +264,20 @@ export default function DrawingComponent({ artist, onSubmit, isCurrentPlayer, on
         <CardTitle className="text-2xl font-bold text-center">Your Turn to Draw!</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex flex-wrap justify-center gap-4">
-          <Input
-            type="color"
-            value={color}
-            onChange={handleColorPick}
-            className="w-12 h-12 p-1 bg-white border border-gray-300 rounded"
-          />
-          <Button onClick={() => setTool('brush')} variant={tool === 'brush' ? 'default' : 'outline'}>
-            Brush
-          </Button>
-          <Button onClick={() => setTool('eraser')} variant={tool === 'eraser' ? 'default' : 'outline'}>
-            Eraser
-          </Button>
-          <Button onClick={() => setTool('fill')} variant={tool === 'fill' ? 'default' : 'outline'}>
-            Fill
-          </Button>
+        <div className="flex flex-wrap justify-center gap-2">
+          {colors.map((c) => (
+            <button
+              key={c}
+              className={`w-8 h-8 rounded-full border-2 ${color === c ? 'border-gray-900' : 'border-gray-300'}`}
+              style={{ backgroundColor: c }}
+              onClick={() => handleColorPick(c)}
+              aria-label={`Select color ${c}`}
+            />
+          ))}
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline">
-                <Droplet className="w-4 h-4 mr-2" />
-                Color Picker
+              <Button variant="outline" className="w-8 h-8 p-0">
+                <Droplet className="w-4 h-4" />
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-64">
@@ -276,12 +292,23 @@ export default function DrawingComponent({ artist, onSubmit, isCurrentPlayer, on
               </div>
             </PopoverContent>
           </Popover>
+        </div>
+        <div className="flex flex-wrap justify-center gap-2">
+          <Button onClick={() => setTool('brush')} variant={tool === 'brush' ? 'default' : 'outline'}>
+            Brush
+          </Button>
+          <Button onClick={() => setTool('eraser')} variant={tool === 'eraser' ? 'default' : 'outline'}>
+            Eraser
+          </Button>
+          <Button onClick={() => setTool('fill')} variant={tool === 'fill' ? 'default' : 'outline'}>
+            Fill
+          </Button>
           <Button onClick={undo} disabled={undoStack.length <= 1}>
-            <UndoIcon className="w-4 h-4 mr-2" />
+            <Undo className="w-4 h-4 mr-2" />
             Undo
           </Button>
           <Button onClick={redo} disabled={redoStack.length === 0}>
-            <RedoIcon className="w-4 h-4 mr-2" />
+            <Redo className="w-4 h-4 mr-2" />
             Redo
           </Button>
         </div>
@@ -307,7 +334,7 @@ export default function DrawingComponent({ artist, onSubmit, isCurrentPlayer, on
           onTouchStart={startDrawing}
           onTouchEnd={stopDrawing}
           onTouchMove={draw}
-          className="border border-gray-300 rounded-lg touch-none"
+          className="border border-gray-300 rounded-lg touch-none w-full h-auto"
         />
         <Input
           type="text"
