@@ -6,11 +6,10 @@ import { database } from './firebase'
 import LobbyComponent from './components/LobbyComponent'
 import DrawingComponent from './components/DrawingComponent'
 import VotingComponent from './components/VotingComponent'
-import ResultsComponent from './components/ResultsComponent'
 import ResetGameComponent from './components/ResetGameComponent'
 import ScoreboardComponent from './components/ScoreboardComponent'
 
-type GameState = 'lobby' | 'drawing' | 'voting' | 'results'
+type GameState = 'lobby' | 'drawing' | 'voting'
 
 export default function Home() {
   const [gameState, setGameState] = useState<GameState>('lobby')
@@ -190,11 +189,13 @@ export default function Home() {
           onJoin={handleJoin}
         />
       )}
-      {currentPlayer && gameState === 'drawing' && (
+      {gameState === 'drawing' && (
         <DrawingComponent
           artist={currentArtist!}
           onSubmit={handleSubmitDrawing}
           isCurrentPlayer={currentPlayer === currentArtist}
+          onJoin={handleJoin}
+          currentPlayer={currentPlayer}
         />
       )}
       {gameState === 'voting' && (
