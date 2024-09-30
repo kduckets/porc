@@ -139,15 +139,19 @@ export default function Home() {
   const updateScores = async () => {
     const newScores = { ...scores }
     let correctVotes = 0
+    const totalVotes = Object.keys(votes).length
+
     Object.entries(votes).forEach(([player, vote]) => {
       if (vote === drawingType) {
         correctVotes++
-        newScores[player] = (newScores[player] || 0) + 1
       }
     })
-    if (currentArtist) {
-      newScores[currentArtist] = (newScores[currentArtist] || 0) + correctVotes
+
+    // Award 1 point to the artist if the majority guessed correctly
+    if (currentArtist && correctVotes > totalVotes / 2) {
+      newScores[currentArtist] = (newScores[currentArtist] || 0) + 1
     }
+
     await set(ref(database, 'scores'), newScores)
   }
 
@@ -180,7 +184,7 @@ export default function Home() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-10 md:p-24">
+    <main className="flex min-h-screen flex-col items-center justify-center p-24">
       <h1 className="text-4xl font-bold mb-8">Poop or Cloud?</h1>
       {gameState === 'lobby' && (
         <LobbyComponent
