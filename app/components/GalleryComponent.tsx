@@ -66,18 +66,18 @@ export default function GalleryComponent({ gallery, currentPlayer, onAddComment 
                     </div>
                   </button>
                 </DialogTrigger>
-                <DialogContent className="w-full sm:max-w-[425px] md:max-w-[600px] lg:max-w-[700px]">
+                <DialogContent className="w-full sm:max-w-[425px] md:max-w-[600px] lg:max-w-[700px] h-[75vh] sm:h-auto">
                   <DialogHeader>
                     <DialogTitle className="text-lg sm:text-xl md:text-2xl text-center mb-2">
                       {entry.title} by {entry.artist}
                     </DialogTitle>
                   </DialogHeader>
-                  <div className="mt-4 flex flex-col items-center">
+                  <div className="mt-4 flex flex-col items-center h-full overflow-y-auto">
                     <div className="w-full max-w-md mx-auto">
                       <img
                         src={entry.drawing}
                         alt={`${entry.title} by ${entry.artist}`}
-                        className="w-full h-auto max-h-[50vh] object-contain mb-4"
+                        className="w-full h-auto max-h-[40vh] object-contain mb-4"
                       />
                     </div>
                     <p className="mt-2 text-sm text-gray-500">Type: {entry.type}</p>
@@ -90,12 +90,12 @@ export default function GalleryComponent({ gallery, currentPlayer, onAddComment 
                     </div>
                     <div className="mt-4 w-full">
                       <h4 className="font-semibold mb-2 text-center">Votes and Comments:</h4>
-                      <ScrollArea className="h-40 w-full border rounded-md p-2">
+                      <ScrollArea className="h-48 w-full border rounded-md p-2">
                         {entry.comments && Object.entries(entry.comments).length > 0 ? (
                           Object.entries(entry.comments).map(([player, { vote, comment }]) => (
                             <div key={player} className="mb-2 p-2 bg-gray-50 rounded">
-                              <p className="font-semibold">{player} {vote && <span className='font-thin italic text-sm'>voted {vote}</span>}</p>
-                              {comment && <p className="text-sm text-gray-600">{comment}</p>}
+                             <p className="font-semibold">{player} {vote && <span className='font-thin italic text-sm'>voted {vote}</span>}</p>
+                             {comment && <p className="text-sm text-gray-600">{comment}</p>}
                             </div>
                           ))
                         ) : (
@@ -110,7 +110,7 @@ export default function GalleryComponent({ gallery, currentPlayer, onAddComment 
                           placeholder="Add a comment"
                           value={newComment}
                           onChange={(e) => setNewComment(e.target.value)}
-                          className="w-full mb-2 text-lg"
+                          className="w-full mb-2"
                         />
                         <Button onClick={handleAddComment} disabled={!newComment.trim()} className="w-full">
                           Add Comment
