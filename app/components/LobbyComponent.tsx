@@ -5,8 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
 
 interface LobbyComponentProps {
   players: string[]
-  onJoin: (name: string) => void
-  onStart: () => void
+  onJoin: (name: string) => Promise<void>
+  onStart: () => Promise<void>
   currentPlayer: string | null
 }
 
@@ -56,7 +56,7 @@ export default function LobbyComponent({ players, onJoin, onStart, currentPlayer
             Start Game
           </Button>
         )}
-        {currentPlayer && players.length < 2 && (
+        {players.length < 2 && (
           <p className="text-sm text-center text-gray-500">
             Waiting for more players to join...
           </p>
