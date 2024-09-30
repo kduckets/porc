@@ -30,14 +30,16 @@ export default function GalleryComponent({ gallery }: GalleryComponentProps) {
               <Dialog key={entry.id}>
                 <DialogTrigger asChild>
                   <button
-                    className="relative aspect-square w-full overflow-hidden rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="relative w-full aspect-square overflow-hidden rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     onClick={() => setSelectedDrawing(entry)}
                   >
-                    <img
-                      src={entry.drawing}
-                      alt={`${entry.title} by ${entry.artist}`}
-                      className="object-cover w-full h-full"
-                    />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <img
+                        src={entry.drawing}
+                        alt={`${entry.title} by ${entry.artist}`}
+                        className="max-w-full max-h-full object-contain"
+                      />
+                    </div>
                     <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 text-sm">
                       <p className="font-bold truncate">{entry.title}</p>
                       <p className="text-xs truncate">by {entry.artist}</p>
