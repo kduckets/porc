@@ -27,7 +27,7 @@ export default function DrawingComponent({ artist, onSubmit, isCurrentPlayer }: 
   const [tool, setTool] = useState<Tool>('brush')
   const [undoStack, setUndoStack] = useState<ImageData[]>([])
   const [redoStack, setRedoStack] = useState<ImageData[]>([])
-  const [startPosition, setStartPosition] = useState<{ x: number; y: number } | null>(null)
+  const [lastPosition, setLastPosition] = useState<{ x: number; y: number } | null>(null)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -58,17 +58,18 @@ export default function DrawingComponent({ artist, onSubmit, isCurrentPlayer }: 
     if (!isCurrentPlayer) return
     setIsDrawing(true)
     const { x, y } = getCoordinates(e)
-    setStartPosition({ x, y })
-    if (tool === 'brush' || tool === 'eraser') {
-      draw(e)
-    } else if (tool === 'fill') {
+    setLastPosition({ x, y })
+    if (tool === 'fill') {
       fillArea(x, y, color)
+    } else if (tool === 'colorPicker') {
+      pickColor(x, y)
     }
   }
 
   const stopDrawing = () => {
     if (!isCurrentPlayer) return
     setIsDrawing(false)
+    setLastPosition(null)
     if (tool === 'rectangle' || tool === 'circle') {
       drawShape()
     }
@@ -76,7 +77,7 @@ export default function DrawingComponent({ artist, onSubmit, isCurrentPlayer }: 
   }
 
   const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
-    if (!isDrawing || !isCurrentPlayer) return
+    if (!isDrawing || !isCurrentPlayer || !lastPosition) return
     const canvas = canvasRef.current
     if (canvas) {
       const context = canvas.getContext('2d')
@@ -86,30 +87,23 @@ export default function DrawingComponent({ artist, onSubmit, isCurrentPlayer }: 
         if (tool === 'brush' || tool === 'eraser') {
           context.strokeStyle = tool === 'eraser' ? '#FFFFFF' : color
           context.lineWidth = brushSize
+          context.beginPath()
+          context.moveTo(lastPosition.x, lastPosition.y)
           context.lineTo(x, y)
           context.stroke()
-          context.beginPath()
-          context.moveTo(x, y)
-        } else if (tool === 'colorPicker') {
-          const imageData = context.getImageData(x, y, 1, 1)
-          const r = imageData.data[0]
-          const g = imageData.data[1]
-          const b = imageData.data[2]
-          setColor(`rgb(${r},${g},${b})`)
-          setTool('brush')
         }
+        setLastPosition({ x, y })
       }
     }
   }
 
   const drawShape = () => {
     const canvas = canvasRef.current
-    if (canvas && startPosition) {
+    if (canvas && lastPosition) {
       const context = canvas.getContext('2d')
       if (context) {
-        const { x, y } = startPosition
-        const endX = getCoordinates(startPosition).x
-        const endY = getCoordinates(startPosition).y
+        const { x, y } = lastPosition
+        const { x: endX, y: endY } = getCoordinates({ x: 0, y: 0 })
         context.strokeStyle = color
         context.lineWidth = brushSize
         context.beginPath()
@@ -141,6 +135,21 @@ export default function DrawingComponent({ artist, onSubmit, isCurrentPlayer }: 
           }
         }
         context.putImageData(imageData, 0, 0)
+      }
+    }
+  }
+
+  const pickColor = (x: number, y: number) => {
+    const canvas = canvasRef.current
+    if (canvas) {
+      const context = canvas.getContext('2d')
+      if (context) {
+        const imageData = context.getImageData(x, y, 1, 1)
+        const r = imageData.data[0]
+        const g = imageData.data[1]
+        const b = imageData.data[2]
+        setColor(`rgb(${r},${g},${b})`)
+        setTool('brush')
       }
     }
   }
