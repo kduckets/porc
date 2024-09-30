@@ -79,10 +79,11 @@ export default function Home() {
 
   const handleJoin = (name: string) => {
     setCurrentPlayer(name)
-    // Store player name in local storage
     localStorage.setItem('playerName', name)
     const playerRef = push(ref(database, 'players'))
     set(playerRef, name)
+    // Initialize score for new player
+    set(ref(database, `scores/${name}`), 0)
   }
 
   const handleStartGame = () => {
@@ -111,9 +112,10 @@ export default function Home() {
   const updateScores = () => {
     const newScores = { ...scores }
     let correctVotes = 0
-    Object.values(votes).forEach((vote) => {
+    Object.entries(votes).forEach(([player, vote]) => {
       if (vote === drawingType) {
         correctVotes++
+        newScores[player] = (newScores[player] || 0) + 1
       }
     })
     if (currentArtist) {
@@ -141,7 +143,6 @@ export default function Home() {
     set(ref(database, 'votes'), null)
     set(ref(database, 'scores'), null)
     setCurrentPlayer(null)
-    // Clear player name from local storage
     localStorage.removeItem('playerName')
   }
 
@@ -181,7 +182,9 @@ export default function Home() {
         />
       )}
       <ScoreboardComponent scores={scores} />
+      <div className='pt-40'>
       <ResetGameComponent onReset={handleResetGame} />
+      </div>
     </main>
   )
 }

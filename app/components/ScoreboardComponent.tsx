@@ -14,15 +14,15 @@ export default function ScoreboardComponent({ scores }: ScoreboardComponentProps
         <TableHeader>
           <TableRow>
             <TableHead className="w-[100px]">Rank</TableHead>
-            <TableHead>Artist</TableHead>
+            <TableHead>Player</TableHead>
             <TableHead className="text-right">Score</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {sortedScores.map(([artist, score], index) => (
-            <TableRow key={artist}>
+          {sortedScores.map(([player, score], index) => (
+            <TableRow key={player}>
               <TableCell className="font-medium">{index + 1}</TableCell>
-              <TableCell>{artist}</TableCell>
+              <TableCell>{player}</TableCell>
               <TableCell className="text-right">{score}</TableCell>
             </TableRow>
           ))}
