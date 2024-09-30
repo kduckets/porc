@@ -92,9 +92,8 @@ export default function GalleryComponent({ gallery, currentPlayer, onAddComment 
                         {entry.comments && Object.entries(entry.comments).length > 0 ? (
                           Object.entries(entry.comments).map(([player, { vote, comment }]) => (
                             <div key={player} className="mb-2 p-2 bg-gray-50 rounded">
-                              <p className="font-semibold">{player}:</p>
-                              <p className="text-sm text-gray-600">Vote: {vote}</p>
-                              {comment && <p className="text-sm text-gray-600">Comment: {comment}</p>}
+                              <p className="font-semibold">{player}: <span className='font-thin'>{vote}</span></p>
+                              {comment && <p className="text-sm text-gray-600">{comment}</p>}
                             </div>
                           ))
                         ) : (
