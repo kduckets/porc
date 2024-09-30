@@ -91,7 +91,7 @@ export default function VotingComponent({
             {Object.entries(votes).map(([player, { vote, comment }]) => (
               <div key={player} className="mb-4 p-2 bg-gray-100 rounded">
                 <p className="font-semibold">{player}: {vote}</p>
-                {comment && <p className="text-sm text-gray-600 mt-1">Comment: {comment}</p>}
+                {comment && <p className="text-sm text-gray-600 mt-1">{comment}</p>}
               </div>
             ))}
           </ScrollArea>
