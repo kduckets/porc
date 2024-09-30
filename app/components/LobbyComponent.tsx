@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Button } from "./ui/button"
 import { Input } from "./ui/input"
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
 
 interface LobbyComponentProps {
   players: string[]
@@ -20,39 +21,47 @@ export default function LobbyComponent({ players, onJoin, onStart, currentPlayer
   }
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-2xl font-semibold">Game Lobby</h2>
-      {currentPlayer ? (
-        <p>Welcome, {currentPlayer}!</p>
-      ) : (
-        <div className="flex space-x-2">
-          <Input
-            type="text"
-            placeholder="Enter your name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleJoin()}
-          />
-          <Button onClick={handleJoin}>Join Game</Button>
+    <Card className="w-full max-w-md mx-auto">
+      <CardHeader>
+        <CardTitle className="text-2xl font-bold text-center">Game Lobby</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {!currentPlayer && (
+          <div className="space-y-2">
+            <Input
+              type="text"
+              placeholder="Enter your name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full"
+              aria-label="Your name"
+            />
+            <Button onClick={handleJoin} className="w-full">
+              Join Game
+            </Button>
+          </div>
+        )}
+        <div className="space-y-2">
+          <h3 className="text-lg font-semibold">Players in Lobby:</h3>
+          <ul className="list-disc list-inside space-y-1">
+            {players.map((player) => (
+              <li key={player} className="text-sm">
+                {player} {player === currentPlayer && <span className="text-green-500">(You)</span>}
+              </li>
+            ))}
+          </ul>
         </div>
-      )}
-      <div>
-        <h3 className="text-xl font-semibold">Players:</h3>
-        <ul>
-          {players.map((player) => (
-            <li key={player}>{player}</li>
-          ))}
-        </ul>
-      </div>
-      {players.length === 1 && (
-        <p className="text-yellow-500 font-semibold">Waiting for more players to join...</p>
-      )}
-      {currentPlayer && players.length >= 2 && (
-        <Button onClick={onStart}>Start Game</Button>
-      )}
-      {currentPlayer && players.length < 2 && (
-        <p className="text-blue-500">At least 2 players are needed to start the game.</p>
-      )}
-    </div>
+        {currentPlayer && players.length >= 2 && (
+          <Button onClick={onStart} className="w-full">
+            Start Game
+          </Button>
+        )}
+        {currentPlayer && players.length < 2 && (
+          <p className="text-sm text-center text-gray-500">
+            Waiting for more players to join...
+          </p>
+        )}
+      </CardContent>
+    </Card>
   )
 }
