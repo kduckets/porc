@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { onValue, ref, set, push, remove, get } from 'firebase/database'
+import { onValue, ref, set, get } from 'firebase/database'
 import { database } from './firebase'
 import LobbyComponent from './components/LobbyComponent'
 import DrawingComponent from './components/DrawingComponent'
@@ -39,11 +39,7 @@ export default function Home() {
 
     const unsubscribePlayers = onValue(playersRef, (snapshot) => {
       const playersData = snapshot.val()
-      if (playersData) {
-        setPlayers(Object.values(playersData))
-      } else {
-        setPlayers([])
-      }
+      setPlayers(playersData ? Object.values(playersData) : [])
     })
 
     const unsubscribeCurrentArtist = onValue(currentArtistRef, (snapshot) => {
@@ -95,8 +91,7 @@ export default function Home() {
     const playersData = playersSnapshot.val()
 
     if (!playersData || !Object.values(playersData).includes(name)) {
-      const newPlayerRef = push(playersRef)
-      await set(newPlayerRef, name)
+      await set(ref(database, `players/${name}`), name)
     }
 
     setCurrentPlayer(name)
@@ -110,32 +105,38 @@ export default function Home() {
     }
   }
 
-  const handleStartGame = () => {
-    const randomArtist = players[Math.floor(Math.random() * players.length)]
-    set(ref(database, 'currentArtist'), randomArtist)
-    set(ref(database, 'gameState'), 'drawing')
-    set(ref(database, 'votes'), {})
-    set(ref(database, 'drawing'), null)
-    set(ref(database, 'drawingType'), null)
-    set(ref(database, 'drawingTitle'), null)
+  const handleStartGame = async () => {
+    const playersSnapshot = await get(ref(database, 'players'))
+    const playersData = playersSnapshot.val()
+    const playersList = playersData ? Object.values(playersData) : []
+    const randomArtist = playersList[Math.floor(Math.random() * playersList.length)]
+    
+    await set(ref(database, 'currentArtist'), randomArtist)
+    await set(ref(database, 'gameState'), 'drawing')
+    await set(ref(database, 'votes'), {})
+    await set(ref(database, 'drawing'), null)
+    await set(ref(database, 'drawingType'), null)
+    await set(ref(database, 'drawingTitle'), null)
   }
 
-  const handleSubmitDrawing = (drawingData: string, type: 'poop' | 'cloud', title: string) => {
-    set(ref(database, 'drawing'), drawingData)
-    set(ref(database, 'drawingType'), type)
-    set(ref(database, 'drawingTitle'), title)
-    set(ref(database, 'gameState'), 'voting')
+  const handleSubmitDrawing = async (drawingData: string, type: 'poop' | 'cloud', title: string) => {
+    await set(ref(database, 'drawing'), drawingData)
+    await set(ref(database, 'drawingType'), type)
+    await set(ref(database, 'drawingTitle'), title)
+    await set(ref(database, 'gameState'), 'voting')
   }
 
-  const handleVote = (player: string, vote: 'poop' | 'cloud') => {
-    set(ref(database, `votes/${player}`), vote)
-    if (Object.keys(votes).length + 1 === players.length - 1) {
-      set(ref(database, 'gameState'), 'results')
+  const handleVote = async (player: string, vote: 'poop' | 'cloud') => {
+    await set(ref(database, `votes/${player}`), vote)
+    const votesSnapshot = await get(ref(database, 'votes'))
+    const votesData = votesSnapshot.val() || {}
+    if (Object.keys(votesData).length === players.length - 1) {
+      await set(ref(database, 'gameState'), 'results')
       updateScores()
     }
   }
 
-  const updateScores = () => {
+  const updateScores = async () => {
     const newScores = { ...scores }
     let correctVotes = 0
     Object.entries(votes).forEach(([player, vote]) => {
@@ -147,29 +148,33 @@ export default function Home() {
     if (currentArtist) {
       newScores[currentArtist] = (newScores[currentArtist] || 0) + correctVotes
     }
-    set(ref(database, 'scores'), newScores)
+    await set(ref(database, 'scores'), newScores)
   }
 
-  const handleNextRound = () => {
-    const currentIndex = players.indexOf(currentArtist!)
-    const nextArtist = players[(currentIndex + 1) % players.length]
-    set(ref(database, 'currentArtist'), nextArtist)
-    set(ref(database, 'gameState'), 'drawing')
-    set(ref(database, 'votes'), {})
-    set(ref(database, 'drawing'), null)
-    set(ref(database, 'drawingType'), null)
-    set(ref(database, 'drawingTitle'), null)
+  const handleNextRound = async () => {
+    const playersSnapshot = await get(ref(database, 'players'))
+    const playersData = playersSnapshot.val()
+    const playersList = playersData ? Object.values(playersData) : []
+    const currentIndex = playersList.indexOf(currentArtist!)
+    const nextArtist = playersList[(currentIndex + 1) % playersList.length]
+    
+    await set(ref(database, 'currentArtist'), nextArtist)
+    await set(ref(database, 'gameState'), 'drawing')
+    await set(ref(database, 'votes'), {})
+    await set(ref(database, 'drawing'), null)
+    await set(ref(database, 'drawingType'), null)
+    await set(ref(database, 'drawingTitle'), null)
   }
 
-  const handleResetGame = () => {
-    set(ref(database, 'gameState'), 'lobby')
-    set(ref(database, 'players'), null)
-    set(ref(database, 'currentArtist'), null)
-    set(ref(database, 'drawing'), null)
-    set(ref(database, 'drawingType'), null)
-    set(ref(database, 'drawingTitle'), null)
-    set(ref(database, 'votes'), null)
-    set(ref(database, 'scores'), null)
+  const handleResetGame = async () => {
+    await set(ref(database, 'gameState'), 'lobby')
+    await set(ref(database, 'players'), {})
+    await set(ref(database, 'currentArtist'), null)
+    await set(ref(database, 'drawing'), null)
+    await set(ref(database, 'drawingType'), null)
+    await set(ref(database, 'drawingTitle'), null)
+    await set(ref(database, 'votes'), {})
+    await set(ref(database, 'scores'), {})
     setCurrentPlayer(null)
     localStorage.removeItem('playerName')
   }
