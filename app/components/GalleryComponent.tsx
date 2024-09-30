@@ -36,6 +36,9 @@ export default function GalleryComponent({ gallery, currentPlayer, onAddComment 
     )
   }
 
+  // Reverse the gallery array to show most recent drawings first
+  const reversedGallery = [...gallery].reverse()
+
   return (
     <Card className="w-full max-w-4xl mx-auto mt-8">
       <CardHeader>
@@ -44,7 +47,7 @@ export default function GalleryComponent({ gallery, currentPlayer, onAddComment 
       <CardContent>
         <ScrollArea className="h-[400px] w-full">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            {gallery.map((entry) => (
+            {reversedGallery.map((entry) => (
               <Dialog key={entry.id}>
                 <DialogTrigger asChild>
                   <button
