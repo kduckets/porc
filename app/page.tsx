@@ -204,6 +204,7 @@ export default function Home() {
           currentArtist={currentArtist!}
           onVote={handleVote}
           currentPlayer={currentPlayer!}
+          votes={votes}
         />
       )}
       {gameState === 'results' && (

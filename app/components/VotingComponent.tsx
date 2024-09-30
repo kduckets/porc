@@ -6,10 +6,18 @@ interface VotingComponentProps {
   currentArtist: string
   onVote: (player: string, vote: 'poop' | 'cloud') => void
   currentPlayer: string
+  votes: Record<string, 'poop' | 'cloud'>
 }
 
-export default function VotingComponent({ drawing, players, currentArtist, onVote, currentPlayer }: VotingComponentProps) {
-  const canVote = currentPlayer !== currentArtist && !players.includes(currentPlayer)
+export default function VotingComponent({ 
+  drawing, 
+  players, 
+  currentArtist, 
+  onVote, 
+  currentPlayer,
+  votes
+}: VotingComponentProps) {
+  const canVote = currentPlayer !== currentArtist && !votes[currentPlayer]
 
   return (
     <div className="space-y-4">
@@ -22,8 +30,15 @@ export default function VotingComponent({ drawing, players, currentArtist, onVot
           <Button onClick={() => onVote(currentPlayer, 'cloud')}>Vote Cloud</Button>
         </div>
       ) : (
-        <p>{currentPlayer === currentArtist ? "You're the artist! Wait for others to vote." : "Waiting for other players to vote..."}</p>
+        <p>
+          {currentPlayer === currentArtist 
+            ? "You're the artist! Wait for others to vote." 
+            : votes[currentPlayer] 
+              ? `You voted: ${votes[currentPlayer]}` 
+              : "Waiting for other players to vote..."}
+        </p>
       )}
+      <p>Votes cast: {Object.keys(votes).length} / {players.length - 1}</p>
     </div>
   )
 }
