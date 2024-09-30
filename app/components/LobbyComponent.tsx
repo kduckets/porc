@@ -44,8 +44,14 @@ export default function LobbyComponent({ players, onJoin, onStart, currentPlayer
           ))}
         </ul>
       </div>
+      {players.length === 1 && (
+        <p className="text-yellow-500 font-semibold">Waiting for more players to join...</p>
+      )}
       {currentPlayer && players.length >= 2 && (
         <Button onClick={onStart}>Start Game</Button>
+      )}
+      {currentPlayer && players.length < 2 && (
+        <p className="text-blue-500">At least 2 players are needed to start the game.</p>
       )}
     </div>
   )
