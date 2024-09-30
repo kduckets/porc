@@ -5,12 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
 
 interface LobbyComponentProps {
   players: string[]
-  onJoin: (name: string) => Promise<void>
   onStart: () => Promise<void>
   currentPlayer: string | null
+  onJoin: (name: string) => Promise<void>
 }
 
-export default function LobbyComponent({ players, onJoin, onStart, currentPlayer }: LobbyComponentProps) {
+export default function LobbyComponent({ players, onStart, currentPlayer, onJoin }: LobbyComponentProps) {
   const [name, setName] = useState('')
 
   const handleJoin = () => {

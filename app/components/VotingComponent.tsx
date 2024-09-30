@@ -1,4 +1,8 @@
+import { useState } from 'react'
 import { Button } from "./ui/button"
+import { Input } from "./ui/input"
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "./ui/card"
+import { Badge } from "./ui/badge"
 
 interface VotingComponentProps {
   drawing: string
@@ -7,6 +11,7 @@ interface VotingComponentProps {
   onVote: (player: string, vote: 'poop' | 'cloud') => void
   currentPlayer: string | null
   votes: Record<string, 'poop' | 'cloud'>
+  onJoin: (name: string) => Promise<void>
 }
 
 export default function VotingComponent({ 
@@ -15,30 +20,77 @@ export default function VotingComponent({
   currentArtist, 
   onVote, 
   currentPlayer,
-  votes
+  votes,
+  onJoin
 }: VotingComponentProps) {
+  const [name, setName] = useState('')
   const canVote = currentPlayer && players.includes(currentPlayer) && currentPlayer !== currentArtist && !votes[currentPlayer]
 
+  const handleJoin = () => {
+    if (name.trim()) {
+      onJoin(name.trim())
+      setName('')
+    }
+  }
+
+  const getVoteMessage = () => {
+    if (!currentPlayer) return "You need to join the game to vote."
+    if (!players.includes(currentPlayer)) return "You're not part of this game. Please join to vote."
+    if (currentPlayer === currentArtist) return "You're the artist! Wait for others to vote."
+    if (votes[currentPlayer]) return `You voted: ${votes[currentPlayer]}`
+    return "Waiting for other players to vote..."
+  }
+
   return (
-    <div className="space-y-4">
-      <h2 className="text-2xl font-semibold">Voting Phase</h2>
-      <p>Artist: {currentArtist}</p>
-      <img src={drawing} alt="Drawing to vote on" className="max-w-md mx-auto" />
-      {canVote ? (
-        <div className="flex justify-center space-x-4">
-          <Button onClick={() => onVote(currentPlayer, 'poop')}>Vote Poop</Button>
-          <Button onClick={() => onVote(currentPlayer, 'cloud')}>Vote Cloud</Button>
+    <Card className="w-full max-w-md mx-auto">
+      <CardHeader>
+        <CardTitle className="text-2xl font-bold text-center">Voting Phase</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {!currentPlayer && (
+          <div className="space-y-2">
+            <Input
+              type="text"
+              placeholder="Enter your name to join"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full"
+              aria-label="Your name"
+            />
+            <Button onClick={handleJoin} className="w-full">
+              Join Game
+            </Button>
+          </div>
+        )}
+        <div className="text-center">
+          <Badge variant="secondary" className="mb-2">Artist</Badge>
+          <p className="text-lg font-semibold">{currentArtist}</p>
         </div>
-      ) : (
-        <p>
-          {!currentPlayer ? "You need to join the game to vote." :
-           !players.includes(currentPlayer) ? "You're not part of this game. Please join to vote." :
-           currentPlayer === currentArtist ? "You're the artist! Wait for others to vote." : 
-           votes[currentPlayer] ? `You voted: ${votes[currentPlayer]}` : 
-           "Waiting for other players to vote..."}
+        <div className="relative pb-[100%] bg-gray-100 rounded-lg overflow-hidden">
+          <img 
+            src={drawing} 
+            alt="Drawing to vote on" 
+            className="absolute top-0 left-0 w-full h-full object-contain"
+          />
+        </div>
+        {canVote ? (
+          <div className="flex flex-col sm:flex-row justify-center space-y-2 sm:space-y-0 sm:space-x-4">
+            <Button onClick={() => onVote(currentPlayer, 'poop')} className="w-full sm:w-auto">
+              Vote Poop
+            </Button>
+            <Button onClick={() => onVote(currentPlayer, 'cloud')} className="w-full sm:w-auto">
+              Vote Cloud
+            </Button>
+          </div>
+        ) : (
+          <p className="text-center text-sm text-gray-600">{getVoteMessage()}</p>
+        )}
+      </CardContent>
+      <CardFooter>
+        <p className="w-full text-center text-sm text-gray-600">
+          Votes cast: {Object.keys(votes).length} / {players.length - 1}
         </p>
-      )}
-      <p>Votes cast: {Object.keys(votes).length} / {players.length - 1}</p>
-    </div>
+      </CardFooter>
+    </Card>
   )
 }

@@ -192,12 +192,12 @@ export default function Home() {
       {gameState === 'lobby' && (
         <LobbyComponent
           players={players}
-          onJoin={handleJoin}
           onStart={handleStartGame}
           currentPlayer={currentPlayer}
+          onJoin={handleJoin}
         />
       )}
-      {gameState === 'drawing' && (
+      {currentPlayer && gameState === 'drawing' && (
         <DrawingComponent
           artist={currentArtist!}
           onSubmit={handleSubmitDrawing}
@@ -212,9 +212,10 @@ export default function Home() {
           onVote={handleVote}
           currentPlayer={currentPlayer}
           votes={votes}
+          onJoin={handleJoin}
         />
       )}
-      {gameState === 'results' && (
+      {currentPlayer && gameState === 'results' && (
         <ResultsComponent
           drawing={drawing!}
           drawingType={drawingType!}
