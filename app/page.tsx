@@ -223,44 +223,46 @@ export default function Home() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24">
-      <h1 className="text-4xl font-bold mb-8">Poop or Cloud?</h1>
-      {gameState === 'lobby' && (
-        <LobbyComponent
-          players={players}
-          onStart={handleStartGame}
+    <main className="flex min-h-screen flex-col items-center justify-center p-4 sm:p-6 md:p-8 lg:p-24">
+      <h1 className="text-3xl sm:text-4xl font-bold mb-4 sm:mb-8 text-center">Poop or Cloud?</h1>
+      <div className="w-full max-w-4xl mx-auto">
+        {gameState === 'lobby' && (
+          <LobbyComponent
+            players={players}
+            onStart={handleStartGame}
+            currentPlayer={currentPlayer}
+            onJoin={handleJoin}
+          />
+        )}
+        {gameState === 'drawing' && (
+          <DrawingComponent
+            artist={currentArtist!}
+            onSubmit={handleSubmitDrawing}
+            isCurrentPlayer={currentPlayer === currentArtist}
+            onJoin={handleJoin}
+            currentPlayer={currentPlayer}
+          />
+        )}
+        {gameState === 'voting' && (
+          <VotingComponent
+            drawing={drawing!}
+            players={players}
+            currentArtist={currentArtist!}
+            onVote={handleVote}
+            currentPlayer={currentPlayer}
+            votes={votes}
+            onJoin={handleJoin}
+            onNextRound={handleNextRound}
+          />
+        )}
+        <GalleryComponent 
+          gallery={gallery} 
           currentPlayer={currentPlayer}
-          onJoin={handleJoin}
+          onAddComment={handleAddComment}
         />
-      )}
-      {gameState === 'drawing' && (
-        <DrawingComponent
-          artist={currentArtist!}
-          onSubmit={handleSubmitDrawing}
-          isCurrentPlayer={currentPlayer === currentArtist}
-          onJoin={handleJoin}
-          currentPlayer={currentPlayer}
-        />
-      )}
-      {gameState === 'voting' && (
-        <VotingComponent
-          drawing={drawing!}
-          players={players}
-          currentArtist={currentArtist!}
-          onVote={handleVote}
-          currentPlayer={currentPlayer}
-          votes={votes}
-          onJoin={handleJoin}
-          onNextRound={handleNextRound}
-        />
-      )}
-      <GalleryComponent 
-        gallery={gallery} 
-        currentPlayer={currentPlayer}
-        onAddComment={handleAddComment}
-      />
-      <ScoreboardComponent scores={scores} />
-      <ResetGameComponent onReset={handleResetGame} />
+        <ScoreboardComponent scores={scores} />
+        <ResetGameComponent onReset={handleResetGame} />
+      </div>
     </main>
   )
 }
