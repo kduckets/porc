@@ -260,13 +260,13 @@ export default function DrawingComponent({ artist, onSubmit, isCurrentPlayer }: 
       <p>Artist: {artist}</p>
       {isCurrentPlayer ? (
         <>
-          <p>Draw either a poop or a cloud!</p>
+          <p>Draw either a poop or a cloud</p>
           <RadioGroup 
             value={drawingType} 
             onValueChange={(value: 'poop' | 'cloud') => setDrawingType(value)}
             className="flex space-x-4"
           >
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 text-lg">
               <RadioGroupItem value="poop" id="poop" />
               <Label htmlFor="poop">Poop</Label>
             </div>
