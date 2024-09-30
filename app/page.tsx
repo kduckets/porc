@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { initializeApp, FirebaseApp } from 'firebase/app'
-import { getDatabase, ref, onValue, set, get, Database, DataSnapshot } from 'firebase/database'
+import { getDatabase, ref, onValue, set, push, get, Database, DataSnapshot } from 'firebase/database'
 import LobbyComponent from './components/LobbyComponent'
 import DrawingComponent from './components/DrawingComponent'
 import VotingComponent from './components/VotingComponent'
@@ -85,7 +85,6 @@ export default function Game() {
         : [playerName]
       set(gameRef, {
         ...currentData,
-        state: 'lobby',
         players: updatedPlayers,
       })
       setCurrentPlayer(playerName)
@@ -207,13 +206,23 @@ export default function Game() {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-4 text-center">Poop or Cloud?</h1>
-      {gameState === 'lobby' && (
+      <h1 className="text-3xl font-bold mb-4">Poop or Cloud?</h1>
+      {!currentPlayer && (
         <LobbyComponent 
           players={players} 
           onJoin={joinGame} 
           onStart={startGame} 
           currentPlayer={currentPlayer}
+          gameInProgress={gameState !== 'lobby'}
+        />
+      )}
+      {currentPlayer && gameState === 'lobby' && (
+        <LobbyComponent 
+          players={players} 
+          onJoin={joinGame} 
+          onStart={startGame} 
+          currentPlayer={currentPlayer}
+          gameInProgress={false}
         />
       )}
       {gameState === 'drawing' && currentArtist && (
@@ -241,10 +250,7 @@ export default function Game() {
           onReset={() => startGame()}
         />
       )}
-
-      <div className='pt-32'>
       <ResetGameComponent onReset={resetGame} />
-      </div>
     </div>
   )
 }
