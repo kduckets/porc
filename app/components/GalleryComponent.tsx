@@ -4,15 +4,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { ScrollArea } from "./ui/scroll-area"
 import { Button } from "./ui/button"
 import { Input } from "./ui/input"
-
-interface DrawingEntry {
-  id: string
-  drawing: string
-  type: 'poop' | 'cloud'
-  title: string
-  artist: string
-  comments: Record<string, string>
-}
+import { Badge } from "./ui/badge"
+import { DrawingEntry } from '../types'
 
 interface GalleryComponentProps {
   gallery: DrawingEntry[]
@@ -29,6 +22,18 @@ export default function GalleryComponent({ gallery, currentPlayer, onAddComment 
       onAddComment(selectedDrawing.id, newComment.trim())
       setNewComment('')
     }
+  }
+
+  const getVoteCounts = (comments: Record<string, { vote: 'poop' | 'cloud', comment: string }> | undefined) => {
+    if (!comments) return { poop: 0, cloud: 0 }
+    return Object.values(comments).reduce(
+      (acc, { vote }) => {
+        if (vote === 'poop') acc.poop++
+        if (vote === 'cloud') acc.cloud++
+        return acc
+      },
+      { poop: 0, cloud: 0 }
+    )
   }
 
   return (
@@ -59,34 +64,46 @@ export default function GalleryComponent({ gallery, currentPlayer, onAddComment 
                     </div>
                   </button>
                 </DialogTrigger>
-                <DialogContent className="max-w-3xl">
+                <DialogContent className="w-full max-w-lg sm:max-w-2xl md:max-w-3xl">
                   <DialogHeader>
-                    <DialogTitle>{entry.title} by {entry.artist}</DialogTitle>
+                    <DialogTitle className="text-lg sm:text-xl md:text-2xl text-center mb-2">
+                      {entry.title} by {entry.artist}
+                    </DialogTitle>
                   </DialogHeader>
-                  <div className="mt-4">
-                    <img
-                      src={entry.drawing}
-                      alt={`${entry.title} by ${entry.artist}`}
-                      className="w-full h-auto max-h-[70vh] object-contain"
-                    />
+                  <div className="mt-4 flex flex-col items-center">
+                    <div className="w-full max-w-md mx-auto">
+                      <img
+                        src={entry.drawing}
+                        alt={`${entry.title} by ${entry.artist}`}
+                        className="w-full h-auto max-h-[50vh] object-contain mb-4"
+                      />
+                    </div>
                     <p className="mt-2 text-sm text-gray-500">Type: {entry.type}</p>
-                    <div className="mt-4">
-                      <h4 className="font-semibold mb-2">Comments:</h4>
+                    <div className="mt-4 flex justify-center space-x-4">
+                      {Object.entries(getVoteCounts(entry.comments)).map(([type, count]) => (
+                        <Badge key={type} variant={type === 'poop' ? 'destructive' : 'default'}>
+                          {type}: {count}
+                        </Badge>
+                      ))}
+                    </div>
+                    <div className="mt-4 w-full">
+                      <h4 className="font-semibold mb-2 text-center">Votes and Comments:</h4>
                       <ScrollArea className="h-40 w-full border rounded-md p-2">
                         {entry.comments && Object.entries(entry.comments).length > 0 ? (
-                          Object.entries(entry.comments).map(([player, comment]) => (
-                            <div key={player} className="mb-2">
+                          Object.entries(entry.comments).map(([player, { vote, comment }]) => (
+                            <div key={player} className="mb-2 p-2 bg-gray-50 rounded">
                               <p className="font-semibold">{player}:</p>
-                              <p className="text-sm text-gray-600">{comment}</p>
+                              <p className="text-sm text-gray-600">Vote: {vote}</p>
+                              {comment && <p className="text-sm text-gray-600">Comment: {comment}</p>}
                             </div>
                           ))
                         ) : (
-                          <p className="text-sm text-gray-500">No comments for this drawing.</p>
+                          <p className="text-sm text-gray-500 text-center">No votes or comments for this drawing.</p>
                         )}
                       </ScrollArea>
                     </div>
                     {currentPlayer && (
-                      <div className="mt-4">
+                      <div className="mt-4 w-full max-w-md">
                         <Input
                           type="text"
                           placeholder="Add a comment"
@@ -94,7 +111,7 @@ export default function GalleryComponent({ gallery, currentPlayer, onAddComment 
                           onChange={(e) => setNewComment(e.target.value)}
                           className="w-full mb-2"
                         />
-                        <Button onClick={handleAddComment} disabled={!newComment.trim()}>
+                        <Button onClick={handleAddComment} disabled={!newComment.trim()} className="w-full">
                           Add Comment
                         </Button>
                       </div>

@@ -9,17 +9,9 @@ import VotingComponent from './components/VotingComponent'
 import ResetGameComponent from './components/ResetGameComponent'
 import ScoreboardComponent from './components/ScoreboardComponent'
 import GalleryComponent from './components/GalleryComponent'
+import { DrawingEntry } from './types'
 
 type GameState = 'lobby' | 'drawing' | 'voting'
-
-interface DrawingEntry {
-  id: string
-  drawing: string
-  type: 'poop' | 'cloud'
-  title: string
-  artist: string
-  comments: Record<string, string>
-}
 
 export default function Home() {
   const [gameState, setGameState] = useState<GameState>('lobby')
@@ -179,12 +171,12 @@ export default function Home() {
 
   const handleNextRound = async (nextArtist: string) => {
     await updateScores()
-  
+
     // Save the drawing to the art gallery with votes and comments
     if (drawing && drawingType && drawingTitle && currentArtist) {
       const galleryRef = ref(database, 'gallery')
       const validComments: Record<string, { vote: 'poop' | 'cloud', comment: string }> = {}
-  
+
       // Filter out any undefined or invalid comments
       Object.entries(votes).forEach(([player, voteData]) => {
         if (voteData && voteData.vote && voteData.comment !== undefined) {
@@ -194,7 +186,7 @@ export default function Home() {
           }
         }
       })
-  
+
       await push(galleryRef, {
         drawing,
         type: drawingType,
@@ -203,7 +195,7 @@ export default function Home() {
         comments: validComments
       })
     }
-  
+
     await set(ref(database, 'currentArtist'), nextArtist)
     await set(ref(database, 'gameState'), 'drawing')
     await set(ref(database, 'votes'), {})
@@ -229,7 +221,7 @@ export default function Home() {
     if (!currentPlayer) return
 
     const drawingRef = ref(database, `gallery/${drawingId}/comments/${currentPlayer}`)
-    await set(drawingRef, comment)
+    await set(drawingRef, { vote: 'comment', comment })
   }
 
   return (
