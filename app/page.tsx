@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { onValue, ref, set, push, remove } from 'firebase/database'
+import { onValue, ref, set, push, remove, get } from 'firebase/database'
 import { database } from './firebase'
 import LobbyComponent from './components/LobbyComponent'
 import DrawingComponent from './components/DrawingComponent'
@@ -36,7 +36,12 @@ export default function Home() {
     })
 
     const unsubscribePlayers = onValue(playersRef, (snapshot) => {
-      setPlayers(snapshot.val() ? Object.values(snapshot.val()) : [])
+      const playersData = snapshot.val()
+      if (playersData) {
+        setPlayers(Object.values(playersData))
+      } else {
+        setPlayers([])
+      }
     })
 
     const unsubscribeCurrentArtist = onValue(currentArtistRef, (snapshot) => {
@@ -59,7 +64,7 @@ export default function Home() {
       setScores(snapshot.val() || {})
     })
 
-    // Load player name from local storage
+    // Load player name from local storage and join the game
     const storedPlayerName = localStorage.getItem('playerName')
     if (storedPlayerName) {
       setCurrentPlayer(storedPlayerName)
@@ -77,13 +82,25 @@ export default function Home() {
     }
   }, [])
 
-  const handleJoin = (name: string) => {
+  const handleJoin = async (name: string) => {
+    const playersRef = ref(database, 'players')
+    const playersSnapshot = await get(playersRef)
+    const playersData = playersSnapshot.val()
+
+    if (!playersData || !Object.values(playersData).includes(name)) {
+      const newPlayerRef = push(playersRef)
+      await set(newPlayerRef, name)
+    }
+
     setCurrentPlayer(name)
     localStorage.setItem('playerName', name)
-    const playerRef = push(ref(database, 'players'))
-    set(playerRef, name)
-    // Initialize score for new player
-    set(ref(database, `scores/${name}`), 0)
+
+    // Initialize or update score for the player
+    const scoresRef = ref(database, `scores/${name}`)
+    const scoreSnapshot = await get(scoresRef)
+    if (!scoreSnapshot.exists()) {
+      await set(scoresRef, 0)
+    }
   }
 
   const handleStartGame = () => {
@@ -182,9 +199,7 @@ export default function Home() {
         />
       )}
       <ScoreboardComponent scores={scores} />
-      <div className='pt-40'>
       <ResetGameComponent onReset={handleResetGame} />
-      </div>
     </main>
   )
 }

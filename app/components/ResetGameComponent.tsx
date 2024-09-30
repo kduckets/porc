@@ -6,7 +6,7 @@ interface ResetGameComponentProps {
 
 export default function ResetGameComponent({ onReset }: ResetGameComponentProps) {
   return (
-    <div className="mt-8">
+    <div className="mt-40">
   
       <Button 
         onClick={onReset}
