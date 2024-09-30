@@ -36,7 +36,6 @@ export default function GalleryComponent({ gallery, currentPlayer, onAddComment 
     )
   }
 
-  // Reverse the gallery array to show most recent drawings first
   const reversedGallery = [...gallery].reverse()
 
   return (
@@ -67,7 +66,7 @@ export default function GalleryComponent({ gallery, currentPlayer, onAddComment 
                     </div>
                   </button>
                 </DialogTrigger>
-                <DialogContent className="w-full max-w-lg sm:max-w-2xl md:max-w-3xl">
+                <DialogContent className="w-full sm:max-w-[425px] md:max-w-[600px] lg:max-w-[700px]">
                   <DialogHeader>
                     <DialogTitle className="text-lg sm:text-xl md:text-2xl text-center mb-2">
                       {entry.title} by {entry.artist}
@@ -105,7 +104,7 @@ export default function GalleryComponent({ gallery, currentPlayer, onAddComment 
                       </ScrollArea>
                     </div>
                     {currentPlayer && (
-                      <div className="mt-4 w-full max-w-md">
+                      <div className="mt-4 w-full">
                         <Input
                           type="text"
                           placeholder="Add a comment"
