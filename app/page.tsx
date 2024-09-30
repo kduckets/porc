@@ -241,7 +241,10 @@ export default function Game() {
           onReset={() => startGame()}
         />
       )}
+
+      <div className='pt-32'>
       <ResetGameComponent onReset={resetGame} />
+      </div>
     </div>
   )
 }

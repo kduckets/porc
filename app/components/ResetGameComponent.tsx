@@ -15,7 +15,7 @@ export default function ResetGameComponent({ onReset }: ResetGameComponentProps)
       >
         Reset Game and Clear Players
       </Button>
-      <p className="mb-4 text-sm">Warning: This will clear all players and reset the game to its initial state.</p>
+      <p className="mb-4 text-sm italic">Warning: This will clear all players and reset the game to its initial state.</p>
 
     </div>
   )
