@@ -57,7 +57,10 @@ export default function VotingComponent({
   return (
     <Card className="w-full max-w-4xl mx-auto">
       <CardHeader>
-        <CardTitle className="text-2xl font-bold text-center">Voting Time!</CardTitle>
+        <CardTitle className="text-2xl font-bold text-center">
+           Voting Time!
+          <p className='text-lg font-thin italic'>Artist: {currentArtist}</p>
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex justify-center">
