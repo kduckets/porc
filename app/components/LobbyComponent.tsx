@@ -1,64 +1,125 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from "./ui/button"
 import { Input } from "./ui/input"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./ui/card"
+import { database } from '../firebase'
+import { ref, onValue, push, set } from 'firebase/database'
 
 interface LobbyComponentProps {
   players: string[]
-  onJoin: (playerName: string) => void
+  onJoin: (name: string) => void
   onStart: () => void
   currentPlayer: string | null
-  gameInProgress: boolean
 }
 
-export default function LobbyComponent({ players, onJoin, onStart, currentPlayer, gameInProgress }: LobbyComponentProps) {
-  const [playerName, setPlayerName] = useState('')
+interface Game {
+  id: string
+  players: string[]
+  state: 'lobby' | 'drawing' | 'voting' | 'results'
+}
+
+export default function LobbyComponent({ players, onJoin, onStart, currentPlayer }: LobbyComponentProps) {
+  const [name, setName] = useState('')
+  const [gamesInProgress, setGamesInProgress] = useState<Game[]>([])
+
+  useEffect(() => {
+    const gamesRef = ref(database, 'games')
+    const unsubscribe = onValue(gamesRef, (snapshot) => {
+      const gamesData = snapshot.val()
+      if (gamesData) {
+        const gamesList = Object.entries(gamesData).map(([id, game]: [string, any]) => ({
+          id,
+          players: game.players || [],
+          state: game.state || 'lobby'
+        }))
+        setGamesInProgress(gamesList)
+      } else {
+        setGamesInProgress([])
+      }
+    })
+
+    return () => unsubscribe()
+  }, [])
 
   const handleJoin = () => {
-    if (playerName.trim()) {
-      onJoin(playerName.trim())
-      setPlayerName('')
+    if (name.trim()) {
+      onJoin(name.trim())
     }
   }
 
+  const createNewGame = () => {
+    const newGameRef = push(ref(database, 'games'))
+    set(newGameRef, {
+      players: [currentPlayer],
+      state: 'lobby'
+    })
+  }
+
+  const joinExistingGame = (gameId: string) => {
+    const gameRef = ref(database, `games/${gameId}/players`)
+    push(gameRef, currentPlayer)
+  }
+
   return (
-    <div className="space-y-4">
-      <h2 className="text-2xl font-semibold">
-        {gameInProgress ? "Join Ongoing Game" : "Lobby"}
-      </h2>
-      {!currentPlayer && (
-        <div className="flex space-x-2">
-          <Input
-            type="text"
-            value={playerName}
-            onChange={(e) => setPlayerName(e.target.value)}
-            placeholder="Enter your name"
-          />
-          <Button onClick={handleJoin}>
-            {gameInProgress ? "Join Game" : "Join Lobby"}
-          </Button>
-        </div>
-      )}
-      {currentPlayer && !gameInProgress && (
-        <p>Welcome, {currentPlayer}! Waiting for other players...</p>
-      )}
-      <div>
-        <h3 className="text-xl font-semibold">Players:</h3>
-        {Array.isArray(players) && players.length > 0 ? (
-          <ul className="list-disc list-inside">
-            {players.map((player, index) => (
-              <li key={index}>{player}</li>
-            ))}
-          </ul>
+    <Card className="w-full max-w-md">
+      <CardHeader>
+        <CardTitle>Lobby</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {!currentPlayer ? (
+          <div className="flex space-x-2">
+            <Input
+              type="text"
+              placeholder="Enter your name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+            <Button onClick={handleJoin}>Join</Button>
+          </div>
         ) : (
-          <p>No players have joined yet.</p>
+          <>
+            <p>Welcome, {currentPlayer}!</p>
+            <div>
+              <h3 className="font-semibold mb-2">Players in lobby:</h3>
+              <ul>
+                {players.map((player, index) => (
+                  <li key={index}>{player}</li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold mb-2">Games in Progress:</h3>
+              {gamesInProgress.length > 0 ? (
+                <ul>
+                  {gamesInProgress.map((game) => (
+                    <li key={game.id} className="mb-2">
+                      Game {game.id.slice(0, 6)} - {game.players.length} players - {game.state}
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="ml-2"
+                        onClick={() => joinExistingGame(game.id)}
+                      >
+                        Join
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>No games in progress</p>
+              )}
+            </div>
+          </>
         )}
-      </div>
-      {!gameInProgress && Array.isArray(players) && players.length >= 2 && currentPlayer && (
-        <Button onClick={onStart}>Start Game</Button>
-      )}
-      {gameInProgress && !currentPlayer && (
-        <p className="text-yellow-500">A game is in progress. Join now to participate in the next round!</p>
-      )}
-    </div>
+      </CardContent>
+      <CardFooter className="flex justify-between">
+        {currentPlayer && (
+          <>
+            <Button onClick={createNewGame}>Create New Game</Button>
+            <Button onClick={onStart}>Start Game</Button>
+          </>
+        )}
+      </CardFooter>
+    </Card>
   )
 }
