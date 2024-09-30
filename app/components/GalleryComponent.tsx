@@ -9,6 +9,7 @@ interface DrawingEntry {
   type: 'poop' | 'cloud'
   title: string
   artist: string
+  comments: Record<string, string>
 }
 
 interface GalleryComponentProps {
@@ -57,6 +58,17 @@ export default function GalleryComponent({ gallery }: GalleryComponentProps) {
                       className="w-full h-auto max-h-[70vh] object-contain"
                     />
                     <p className="mt-2 text-sm text-gray-500">Type: {entry.type}</p>
+                    <div className="mt-4">
+                      <h4 className="font-semibold mb-2">Comments:</h4>
+                      <ScrollArea className="h-40 w-full border rounded-md p-2">
+                        {Object.entries(entry.comments).map(([player, comment]) => (
+                          <div key={player} className="mb-2">
+                            <p className="font-semibold">{player}:</p>
+                            <p className="text-sm text-gray-600">{comment}</p>
+                          </div>
+                        ))}
+                      </ScrollArea>
+                    </div>
                   </div>
                 </DialogContent>
               </Dialog>
