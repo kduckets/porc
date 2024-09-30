@@ -16,7 +16,7 @@ export default function GalleryComponent({ gallery }: GalleryComponentProps) {
   return (
     <Card className="w-full max-w-4xl mx-auto mt-8">
       <CardHeader>
-        <CardTitle className="text-2xl font-bold text-center">Drawing Gallery</CardTitle>
+        <CardTitle className="text-2xl font-bold text-center">Art Gallery</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
