@@ -90,7 +90,7 @@ export default function GalleryComponent({ gallery, currentPlayer, onAddComment 
                     </div>
                     <div className="mt-4 w-full">
                       <h4 className="font-semibold mb-2 text-center">Votes and Comments:</h4>
-                      <ScrollArea className="h-48 w-full border rounded-md p-2">
+                      <ScrollArea className="h-32 md:h-56 w-full border rounded-md p-2">
                         {entry.comments && Object.entries(entry.comments).length > 0 ? (
                           Object.entries(entry.comments).map(([player, { vote, comment }]) => (
                             <div key={player} className="mb-2 p-2 bg-gray-50 rounded">
@@ -110,7 +110,7 @@ export default function GalleryComponent({ gallery, currentPlayer, onAddComment 
                           placeholder="Add a comment"
                           value={newComment}
                           onChange={(e) => setNewComment(e.target.value)}
-                          className="w-full mb-2 text-lg"
+                          className="w-full mb-2 text-base"
                         />
                         <Button onClick={handleAddComment} disabled={!newComment.trim()} className="w-full">
                           Add Comment
