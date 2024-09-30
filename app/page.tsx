@@ -146,6 +146,7 @@ export default function Home() {
     Object.entries(votes).forEach(([player, vote]) => {
       if (vote === drawingType) {
         correctVotes++
+        newScores[player] = (newScores[player] || 0) + 1
       }
     })
 
@@ -220,6 +221,8 @@ export default function Home() {
           drawingTitle={drawingTitle!}
           votes={votes}
           onNextRound={handleNextRound}
+          currentPlayer={currentPlayer}
+          currentArtist={currentArtist!}
         />
       )}
       <ScoreboardComponent scores={scores} />
