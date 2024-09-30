@@ -15,7 +15,7 @@ const geistMono = localFont({
 
 export const metadata: Metadata = {
   title: "Poop or Cloud",
-  description: "Is it a poop, or a cloud?",
+  description: "Is it a poop, or is it a cloud?",
 };
 
 export default function RootLayout({
