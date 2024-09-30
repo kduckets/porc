@@ -30,10 +30,25 @@ export default function DrawingComponent({ artist, onSubmit, isCurrentPlayer }: 
   const [undoStack, setUndoStack] = useState<ImageData[]>([])
   const [redoStack, setRedoStack] = useState<ImageData[]>([])
   const [lastPosition, setLastPosition] = useState<{ x: number; y: number } | null>(null)
+  const [canvasSize, setCanvasSize] = useState({ width: 400, height: 400 })
+
+  useEffect(() => {
+    const updateCanvasSize = () => {
+      const width = Math.min(400, window.innerWidth - 40) // 40px for padding
+      setCanvasSize({ width, height: width })
+    }
+
+    updateCanvasSize()
+    window.addEventListener('resize', updateCanvasSize)
+
+    return () => window.removeEventListener('resize', updateCanvasSize)
+  }, [])
 
   useEffect(() => {
     const canvas = canvasRef.current
     if (canvas) {
+      canvas.width = canvasSize.width
+      canvas.height = canvasSize.height
       const context = canvas.getContext('2d')
       if (context) {
         context.lineCap = 'round'
@@ -43,7 +58,7 @@ export default function DrawingComponent({ artist, onSubmit, isCurrentPlayer }: 
         saveState()
       }
     }
-  }, [])
+  }, [canvasSize])
 
   const saveState = () => {
     const canvas = canvasRef.current
@@ -260,13 +275,13 @@ export default function DrawingComponent({ artist, onSubmit, isCurrentPlayer }: 
       <p>Artist: {artist}</p>
       {isCurrentPlayer ? (
         <>
-          <p>Draw either a poop or a cloud</p>
+          <p>Draw either a poop or a cloud!</p>
           <RadioGroup 
             value={drawingType} 
             onValueChange={(value: 'poop' | 'cloud') => setDrawingType(value)}
             className="flex space-x-4"
           >
-            <div className="flex items-center space-x-2 text-lg">
+            <div className="flex items-center space-x-2">
               <RadioGroupItem value="poop" id="poop" />
               <Label htmlFor="poop">Poop</Label>
             </div>
@@ -293,7 +308,7 @@ export default function DrawingComponent({ artist, onSubmit, isCurrentPlayer }: 
               />
             ))}
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 flex-wrap">
             <Button
               variant={tool === 'brush' ? 'default' : 'outline'}
               size="icon"
@@ -367,8 +382,8 @@ export default function DrawingComponent({ artist, onSubmit, isCurrentPlayer }: 
           </div>
           <canvas
             ref={canvasRef}
-            width={400}
-            height={400}
+            width={canvasSize.width}
+            height={canvasSize.height}
             className="border border-gray-300 touch-none bg-white"
             onMouseDown={startDrawing}
             onMouseMove={draw}
