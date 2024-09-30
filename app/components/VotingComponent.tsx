@@ -12,6 +12,7 @@ interface VotingComponentProps {
   currentPlayer: string | null
   votes: Record<string, 'poop' | 'cloud'>
   onJoin: (name: string) => Promise<void>
+  onNextRound: (nextArtist: string) => void
 }
 
 export default function VotingComponent({ 
@@ -21,15 +22,23 @@ export default function VotingComponent({
   onVote, 
   currentPlayer,
   votes,
-  onJoin
+  onJoin,
+  onNextRound
 }: VotingComponentProps) {
   const [name, setName] = useState('')
   const canVote = currentPlayer && players.includes(currentPlayer) && currentPlayer !== currentArtist && !votes[currentPlayer]
+  const allVotesSubmitted = Object.keys(votes).length === players.length - 1
 
   const handleJoin = () => {
     if (name.trim()) {
       onJoin(name.trim())
       setName('')
+    }
+  }
+
+  const handleNextRound = () => {
+    if (currentPlayer) {
+      onNextRound(currentPlayer)
     }
   }
 
@@ -84,6 +93,11 @@ export default function VotingComponent({
           </div>
         ) : (
           <p className="text-center text-sm text-gray-600">{getVoteMessage()}</p>
+        )}
+        {allVotesSubmitted && currentPlayer && (
+          <Button onClick={handleNextRound} className="w-full">
+            Next Round (You'll be the artist)
+          </Button>
         )}
       </CardContent>
       <CardFooter>

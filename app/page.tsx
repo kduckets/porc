@@ -133,7 +133,6 @@ export default function Home() {
     const votesSnapshot = await get(ref(database, 'votes'))
     const votesData = votesSnapshot.val() || {}
     if (Object.keys(votesData).length === players.length - 1) {
-      await set(ref(database, 'gameState'), 'results')
       updateScores()
     }
   }
@@ -158,13 +157,7 @@ export default function Home() {
     await set(ref(database, 'scores'), newScores)
   }
 
-  const handleNextRound = async () => {
-    const playersSnapshot = await get(ref(database, 'players'))
-    const playersData = playersSnapshot.val()
-    const playersList = playersData ? Object.values(playersData) : []
-    const currentIndex = playersList.indexOf(currentArtist!)
-    const nextArtist = playersList[(currentIndex + 1) % playersList.length]
-    
+  const handleNextRound = async (nextArtist: string) => {
     await set(ref(database, 'currentArtist'), nextArtist)
     await set(ref(database, 'gameState'), 'drawing')
     await set(ref(database, 'votes'), {})
@@ -213,17 +206,7 @@ export default function Home() {
           currentPlayer={currentPlayer}
           votes={votes}
           onJoin={handleJoin}
-        />
-      )}
-      {currentPlayer && gameState === 'results' && (
-        <ResultsComponent
-          drawing={drawing!}
-          drawingType={drawingType!}
-          drawingTitle={drawingTitle!}
-          votes={votes}
           onNextRound={handleNextRound}
-          currentPlayer={currentPlayer}
-          currentArtist={currentArtist!}
         />
       )}
       <ScoreboardComponent scores={scores} />
