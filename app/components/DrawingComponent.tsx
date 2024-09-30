@@ -92,7 +92,9 @@ export default function DrawingComponent({ artist, onSubmit, isCurrentPlayer }: 
           context.moveTo(x, y)
         } else if (tool === 'colorPicker') {
           const imageData = context.getImageData(x, y, 1, 1)
-          const [r, g, b] = imageData.data
+          const r = imageData.data[0]
+          const g = imageData.data[1]
+          const b = imageData.data[2]
           setColor(`rgb(${r},${g},${b})`)
           setTool('brush')
         }
@@ -145,7 +147,10 @@ export default function DrawingComponent({ artist, onSubmit, isCurrentPlayer }: 
 
   const getPixelColor = (imageData: ImageData, x: number, y: number): string => {
     const index = (y * imageData.width + x) * 4
-    return `rgb(${imageData.data[index]},${imageData.data[index + 1]},${imageData.data[index + 2]})`
+    const r = imageData.data[index]
+    const g = imageData.data[index + 1]
+    const b = imageData.data[index + 2]
+    return `rgb(${r},${g},${b})`
   }
 
   const setPixelColor = (imageData: ImageData, x: number, y: number, color: string) => {
