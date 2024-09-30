@@ -179,21 +179,31 @@ export default function Home() {
 
   const handleNextRound = async (nextArtist: string) => {
     await updateScores()
-
-    // Save the drawing to the art gallery with comments
+  
+    // Save the drawing to the art gallery with votes and comments
     if (drawing && drawingType && drawingTitle && currentArtist) {
       const galleryRef = ref(database, 'gallery')
+      const validComments: Record<string, { vote: 'poop' | 'cloud', comment: string }> = {}
+  
+      // Filter out any undefined or invalid comments
+      Object.entries(votes).forEach(([player, voteData]) => {
+        if (voteData && voteData.vote && voteData.comment !== undefined) {
+          validComments[player] = {
+            vote: voteData.vote,
+            comment: voteData.comment
+          }
+        }
+      })
+  
       await push(galleryRef, {
         drawing,
         type: drawingType,
         title: drawingTitle,
         artist: currentArtist,
-        comments: Object.fromEntries(
-          Object.entries(votes).map(([player, { comment }]) => [player, comment])
-        )
+        comments: validComments
       })
     }
-
+  
     await set(ref(database, 'currentArtist'), nextArtist)
     await set(ref(database, 'gameState'), 'drawing')
     await set(ref(database, 'votes'), {})
