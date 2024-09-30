@@ -244,9 +244,9 @@ export default function Home() {
           onNextRound={handleNextRound}
         />
       )}
+      <GalleryComponent gallery={gallery} />
       <ScoreboardComponent scores={scores} />
       <ResetGameComponent onReset={handleResetGame} />
-      <GalleryComponent gallery={gallery} />
     </main>
   )
 }
