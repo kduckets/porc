@@ -27,7 +27,7 @@ export default function VotingComponent({
 }: VotingComponentProps) {
   const [name, setName] = useState('')
   const canVote = currentPlayer && players.includes(currentPlayer) && currentPlayer !== currentArtist && !votes[currentPlayer]
-  const allVotesSubmitted = Object.keys(votes).length === players.length - 1
+  const hasVoted = currentPlayer && votes[currentPlayer]
 
   const handleJoin = () => {
     if (name.trim()) {
@@ -94,7 +94,7 @@ export default function VotingComponent({
         ) : (
           <p className="text-center text-sm text-gray-600">{getVoteMessage()}</p>
         )}
-        {allVotesSubmitted && currentPlayer && (
+        {hasVoted && (
           <Button onClick={handleNextRound} className="w-full">
             Next Round (You'll be the artist)
           </Button>

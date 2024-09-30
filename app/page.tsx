@@ -148,15 +148,6 @@ export default function Home() {
     await set(ref(database, 'drawingType'), type)
     await set(ref(database, 'drawingTitle'), title)
     await set(ref(database, 'gameState'), 'voting')
-
-    // Save the drawing to the gallery
-    const galleryRef = ref(database, 'gallery')
-    await push(galleryRef, {
-      drawing: drawingData,
-      type,
-      title,
-      artist: currentArtist
-    })
   }
 
   const handleVote = async (player: string, vote: 'poop' | 'cloud') => {
@@ -191,6 +182,19 @@ export default function Home() {
   }
 
   const handleNextRound = async (nextArtist: string) => {
+    await updateScores()
+
+    // Save the current drawing to the gallery
+    if (drawing && drawingType && drawingTitle && currentArtist) {
+      const galleryRef = ref(database, 'gallery')
+      await push(galleryRef, {
+        drawing,
+        type: drawingType,
+        title: drawingTitle,
+        artist: currentArtist
+      })
+    }
+
     await set(ref(database, 'currentArtist'), nextArtist)
     await set(ref(database, 'gameState'), 'drawing')
     await set(ref(database, 'votes'), {})
@@ -213,7 +217,7 @@ export default function Home() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24">
+    <main className="flex min-h-screen flex-col items-center justify-center p-4 sm:p-8 md:p-24">
       <h1 className="text-4xl font-bold mb-8">Poop or Cloud?</h1>
       {gameState === 'lobby' && (
         <LobbyComponent
