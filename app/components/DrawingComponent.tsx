@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from 'react'
 import { Button } from "./ui/button"
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group"
 import { Label } from "./ui/label"
+import { Slider } from "./ui/slider"
+import { Paintbrush, Eraser } from 'lucide-react'
 
 interface DrawingComponentProps {
   artist: string
@@ -9,20 +11,23 @@ interface DrawingComponentProps {
   isCurrentPlayer: boolean
 }
 
+type Tool = 'brush' | 'eraser'
+
+const colors = ['#000000', '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF']
+
 export default function DrawingComponent({ artist, onSubmit, isCurrentPlayer }: DrawingComponentProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [isDrawing, setIsDrawing] = useState(false)
   const [drawingType, setDrawingType] = useState<'poop' | 'cloud'>('poop')
-  const [lastX, setLastX] = useState(0)
-  const [lastY, setLastY] = useState(0)
+  const [color, setColor] = useState('#000000')
+  const [brushSize, setBrushSize] = useState(2)
+  const [tool, setTool] = useState<Tool>('brush')
 
   useEffect(() => {
     const canvas = canvasRef.current
     if (canvas) {
       const context = canvas.getContext('2d')
       if (context) {
-        context.strokeStyle = 'black'
-        context.lineWidth = 2
         context.lineCap = 'round'
         context.lineJoin = 'round'
       }
@@ -32,9 +37,12 @@ export default function DrawingComponent({ artist, onSubmit, isCurrentPlayer }: 
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     if (!isCurrentPlayer) return
     setIsDrawing(true)
-    const { x, y } = getCoordinates(e)
-    setLastX(x)
-    setLastY(y)
+    draw(e)
+  }
+
+  const stopDrawing = () => {
+    if (!isCurrentPlayer) return
+    setIsDrawing(false)
   }
 
   const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
@@ -43,42 +51,18 @@ export default function DrawingComponent({ artist, onSubmit, isCurrentPlayer }: 
     if (canvas) {
       const context = canvas.getContext('2d')
       if (context) {
-        const { x, y } = getCoordinates(e)
-        context.beginPath()
-        context.moveTo(lastX, lastY)
+        const rect = canvas.getBoundingClientRect()
+        const x = ('touches' in e ? e.touches[0].clientX : e.clientX) - rect.left
+        const y = ('touches' in e ? e.touches[0].clientY : e.clientY) - rect.top
+        
+        context.strokeStyle = tool === 'eraser' ? '#FFFFFF' : color
+        context.lineWidth = brushSize
         context.lineTo(x, y)
         context.stroke()
-        setLastX(x)
-        setLastY(y)
+        context.beginPath()
+        context.moveTo(x, y)
       }
     }
-  }
-
-  const stopDrawing = () => {
-    if (!isCurrentPlayer) return
-    setIsDrawing(false)
-  }
-
-  const getCoordinates = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current
-    if (canvas) {
-      const rect = canvas.getBoundingClientRect()
-      const scaleX = canvas.width / rect.width
-      const scaleY = canvas.height / rect.height
-
-      if ('touches' in e) {
-        return {
-          x: (e.touches[0].clientX - rect.left) * scaleX,
-          y: (e.touches[0].clientY - rect.top) * scaleY
-        }
-      } else {
-        return {
-          x: (e.clientX - rect.left) * scaleX,
-          y: (e.clientY - rect.top) * scaleY
-        }
-      }
-    }
-    return { x: 0, y: 0 }
   }
 
   const handleSubmit = () => {
@@ -95,7 +79,8 @@ export default function DrawingComponent({ artist, onSubmit, isCurrentPlayer }: 
     if (canvas) {
       const context = canvas.getContext('2d')
       if (context) {
-        context.clearRect(0, 0, canvas.width, canvas.height)
+        context.fillStyle = '#FFFFFF'
+        context.fillRect(0, 0, canvas.width, canvas.height)
       }
     }
   }
@@ -121,11 +106,52 @@ export default function DrawingComponent({ artist, onSubmit, isCurrentPlayer }: 
               <Label htmlFor="cloud">Cloud</Label>
             </div>
           </RadioGroup>
+          <div className="flex space-x-4 items-center">
+            <div className="flex space-x-2">
+              {colors.map((c) => (
+                <button
+                  key={c}
+                  className={`w-8 h-8 rounded-full ${color === c ? 'ring-2 ring-offset-2 ring-gray-400' : ''}`}
+                  style={{ backgroundColor: c }}
+                  onClick={() => setColor(c)}
+                  aria-label={`Select color ${c}`}
+                />
+              ))}
+            </div>
+            <div className="flex items-center space-x-2">
+              <Button
+                variant={tool === 'brush' ? 'default' : 'outline'}
+                size="icon"
+                onClick={() => setTool('brush')}
+              >
+                <Paintbrush className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={tool === 'eraser' ? 'default' : 'outline'}
+                size="icon"
+                onClick={() => setTool('eraser')}
+              >
+                <Eraser className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+          <div className="flex items-center space-x-4">
+            <Label htmlFor="brush-size">Brush Size:</Label>
+            <Slider
+              id="brush-size"
+              min={1}
+              max={20}
+              step={1}
+              value={[brushSize]}
+              onValueChange={(value) => setBrushSize(value[0])}
+              className="w-[200px]"
+            />
+          </div>
           <canvas
             ref={canvasRef}
             width={400}
             height={400}
-            className="border border-gray-300 touch-none"
+            className="border border-gray-300 touch-none bg-white"
             onMouseDown={startDrawing}
             onMouseMove={draw}
             onMouseUp={stopDrawing}
