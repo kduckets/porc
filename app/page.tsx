@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { initializeApp, FirebaseApp } from 'firebase/app'
-import { getDatabase, ref, onValue, set, push, get, Database, DataSnapshot } from 'firebase/database'
+import { getDatabase, ref, onValue, set, get, Database, DataSnapshot } from 'firebase/database'
 import LobbyComponent from './components/LobbyComponent'
 import DrawingComponent from './components/DrawingComponent'
 import VotingComponent from './components/VotingComponent'
