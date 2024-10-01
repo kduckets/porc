@@ -226,6 +226,7 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4 sm:p-6 md:p-8 lg:p-24">
+      <div className="w-full max-w-4xl mx-auto bg-white bg-opacity-90 p-6 rounded-lg shadow-lg">
       <h1 className="text-3xl sm:text-4xl font-bold mb-4 sm:mb-8 text-center">Poop or Cloud?</h1>
       <div className="w-full max-w-4xl mx-auto">
         {gameState === 'lobby' && (
@@ -264,6 +265,7 @@ export default function Home() {
         />
         <ScoreboardComponent scores={scores} />
         {/* <ResetGameComponent onReset={handleResetGame} /> */}
+      </div>
       </div>
     </main>
   )
