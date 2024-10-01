@@ -156,8 +156,8 @@ export default function Home() {
       if (vote === drawingType) {
         // Player voted correctly
         newScores[player] = (newScores[player] || 0) + 1
-      } else {
-        // Player voted incorrectly, artist gets a point
+        
+        // Artist gets a point for each correct vote
         if (currentArtist) {
           newScores[currentArtist] = (newScores[currentArtist] || 0) + 1
         }
@@ -166,7 +166,7 @@ export default function Home() {
   
     await set(ref(database, 'scores'), newScores)
   }
-  
+
   const handleNextRound = async (nextArtist: string) => {
     await updateScores()
 
