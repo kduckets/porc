@@ -62,14 +62,14 @@ export default function GalleryComponent({ gallery, currentPlayer, onAddComment 
                     </div>
                     <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 text-sm">
                       <p className="font-bold truncate">{entry.title}</p>
-                      <p className="text-xs truncate">by {entry.artist}</p>
+                      <p className="text-xs font-thin truncate">by {entry.artist}</p>
                     </div>
                   </button>
                 </DialogTrigger>
                 <DialogContent className="w-full sm:max-w-[425px] md:max-w-[600px] lg:max-w-[700px] h-[75vh] sm:h-auto">
                   <DialogHeader>
                     <DialogTitle className="text-lg sm:text-xl md:text-2xl text-center mb-2">
-                      {entry.title} by {entry.artist}
+                      {entry.title} <span className='font-thin'>by {entry.artist}</span>
                     </DialogTitle>
                   </DialogHeader>
                   <div className="mt-4 flex flex-col items-center h-full overflow-y-auto">
