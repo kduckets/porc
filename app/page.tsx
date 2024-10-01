@@ -151,20 +151,18 @@ export default function Home() {
 
   const updateScores = async () => {
     const newScores = { ...scores }
-    let correctVotes = 0
-    const totalVotes = Object.keys(votes).length
 
     Object.entries(votes).forEach(([player, { vote }]) => {
       if (vote === drawingType) {
-        correctVotes++
+        // Player voted correctly
         newScores[player] = (newScores[player] || 0) + 1
+        
+        // Artist gets a point for each correct vote
+        if (currentArtist) {
+          newScores[currentArtist] = (newScores[currentArtist] || 0) + 1
+        }
       }
     })
-
-    // Award 1 point to the artist if the majority guessed correctly
-    if (currentArtist && correctVotes > totalVotes / 2) {
-      newScores[currentArtist] = (newScores[currentArtist] || 0) + 1
-    }
 
     await set(ref(database, 'scores'), newScores)
   }
@@ -227,8 +225,7 @@ export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4 sm:p-6 md:p-8 lg:p-24">
       <div className="w-full max-w-4xl mx-auto bg-white bg-opacity-90 p-6 rounded-lg shadow-lg">
-      <h1 className="text-3xl sm:text-4xl font-bold mb-4 sm:mb-8 text-center">Poop or Cloud?</h1>
-      <div className="w-full max-w-4xl mx-auto">
+        <h1 className="text-3xl sm:text-4xl font-bold mb-4 sm:mb-8 text-center">Poop or Cloud?</h1>
         {gameState === 'lobby' && (
           <LobbyComponent
             players={players}
@@ -265,7 +262,6 @@ export default function Home() {
         />
         <ScoreboardComponent scores={scores} />
         {/* <ResetGameComponent onReset={handleResetGame} /> */}
-      </div>
       </div>
     </main>
   )
