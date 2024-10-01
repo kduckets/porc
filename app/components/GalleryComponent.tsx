@@ -42,7 +42,7 @@ export default function GalleryComponent({ gallery, currentPlayer, onAddComment 
     <Card className="w-full max-w-4xl mx-auto mt-8">
       <CardHeader>
         <CardTitle className="text-2xl font-bold text-center">
-            <span className='text-white'>F</span>Art Gallery</CardTitle>
+            <span className='text-white'>F</span>Art Gallery </CardTitle>
       </CardHeader>
       <CardContent>
         <ScrollArea className="h-[400px] w-full">
