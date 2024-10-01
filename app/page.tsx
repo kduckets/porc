@@ -151,22 +151,22 @@ export default function Home() {
 
   const updateScores = async () => {
     const newScores = { ...scores }
-
+  
     Object.entries(votes).forEach(([player, { vote }]) => {
       if (vote === drawingType) {
         // Player voted correctly
         newScores[player] = (newScores[player] || 0) + 1
-        
-        // Artist gets a point for each correct vote
+      } else {
+        // Player voted incorrectly, artist gets a point
         if (currentArtist) {
           newScores[currentArtist] = (newScores[currentArtist] || 0) + 1
         }
       }
     })
-
+  
     await set(ref(database, 'scores'), newScores)
   }
-
+  
   const handleNextRound = async (nextArtist: string) => {
     await updateScores()
 
